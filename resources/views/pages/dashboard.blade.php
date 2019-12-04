@@ -41,19 +41,17 @@
             </button>
             <button class="rounded px-4 py-2 text-center bg-purple-600 text-white cursor-pointer outline-none" id="manage_pupil_btn">Manage People
             </button>
-            <button class="rounded px-4 py-2 text-center bg-red-800 text-white cursor-pointer ml-3 outline-none" id="delete_all_btn"><a href="{{ url('/destroy/posts') }}">Delete All</a>
-            </button>
         </div>
 
         <table class="w-full">
             <thead>
                 <tr>
-                    <th width="30%" class="text-purple-600 text-xl text-left">This Week's Status</th>
-                    <th>People</th>
+                    <th width="25%" class="text-purple-600 text-xl text-left">This Week's Status</th>
+                    <th width="5%">People</th>
                     <th width="15%">Status</th>
-                    <th width="20%">Timeline</th>
-                    <th>Time Tracking</th>
-                    <th>Delete</th>
+                    <th width="15%">Timeline</th>
+                    <th width="13%">Time Tracking</th>
+                    <th width="20%">Category</th>
                 </tr>
             </thead>
             <tbody>
@@ -128,20 +126,40 @@
                     <td>
                         <span class="block mx-auto rounded-full h-6 w-6/7 bg-black overflow-hidden relative">
                             <div class="bg-purple-600 w-1/2 h-full z-10 relative"></div>
-                            <div class="text-center text-white text-sm z-20 center w-full">{{ $post -> due_date }}</div>
+                            <div class="text-center text-white text-sm z-20 center w-full">
+                                <?php
+                                $source = $post->created_at;
+                                $date = new DateTime($source);
+                                echo $date->format('M d');
+                                ?> -
+                                {{ $post -> due_date }}
+                            </div>
                         </span>
                     </td>
                     <td class="text-gray-600">
-                        3 days
+                        <script>
+                            <?php
+                            $fromDate = $post->created_at;
+                            $date = new DateTime($fromDate);
+                            $from = $date->format('d');
+
+                            $toDate = $post->due_date;
+                            $date1 = explode(" ", $toDate);
+                            $to = $date1[1];
+
+                            echo " ?> dispatchTimer($from, $to); <?php " ?>
+                        </script>
+
                     </td>
                     <td>
-                        <button class=" mx-auto rounded w-4/5 py-2 bg-red-800 text-white cursor-pointer"><a href="{{ url('/post/destroy/'.$post -> id) }}">Delete</a></button>
+                        {{ $post -> category }}
                     </td>
                 </tr>
                 @endforeach
+                @else
+                <tr class="bg-gray-100 border-b border-gray-100"> </tr>
                 @endif
 
-                @if(count($posts) > 0)
                 <form method="POST" action="{{ url('/post/add') }}" autocomplete="off">
                     @csrf
                     <tr class="bg-gray-100 border-b border-gray-100 append-child relative hidden">
@@ -170,7 +188,7 @@
                         </td>
                         <td class="bg-blue-600 text-white relative cursor-pointer status_priority_wrapper status_priority_wrapper22" onclick="handleDropdown(22)">
                             <p class="text-white" id="ss">Not Started</p>
-                            <ul class="absolute top-0 mt-12 shadow-xl -ml-8 left-0 w-48 bg-white dropdown z-50 hidden status_priority_dropdown">
+                            <ul class="absolute top-0 mt-12 shadow-xl ml-16 left-0 w-48 bg-white dropdown z-50 hidden status_priority_dropdown">
                                 @if(count($statuses) > 0)
                                 @foreach($statuses as $status)
                                 <li onclick="addStatus({{$status}})" class="border-b border-gray-300 py-3 flex flex-start items-center px-4 
@@ -204,111 +222,29 @@
                                 @endforeach
                                 @endif
                             </ul>
-                            <input name="status_id" value="" id="status-id" type="text" class="hidden" />
+                            <input name="status_id" value="4" id="status-id" type="text" class="hidden" />
                         </td>
                         <td>
                             <span class="block mx-auto rounded-full h-6 w-6/7 bg-black overflow-hidden relative">
                                 <div class="bg-purple-600 w-1/6 h-full z-10 relative"></div>
-                                <div class="flex -mt-5 z-50 relative justify-center">
+                                <div class="datePicker">
                                     <input type="text" class="text-center text-white text-sm z-20 bg-transparent" id="datepicker1" disabled size="10" />
-                                    <input type="text" class="text-center text-white text-sm z-20  bg-transparent text-left -ml-20 pl-20" id="datepicker" size="9">
+                                    <input name="datetimes" type="text" class="text-center text-white text-sm z-20  bg-transparent text-left -ml-20 pl-10" id="datepicker" size="9">
                                 </div>
                                 <p class="center text-white z-50">-</p>
                             </span>
                         </td>
                         <td>
-                            <input class="bg-transparent" name="time" value="" type="text" disabled />
+                            <input class="bg-transparent w-1/2" name="time" value="" type="text" disabled />
                         </td>
                         <td>
-                            <button type="submit" class=" mx-auto rounded w-4/5 py-2 bg-red-800 text-white cursor-pointer">Add</button>
+                            <input name="category" class="h-full px-1 text-sm px-3 w-full rounded-lg" type="text" placeholder="Category" />
+                        </td>
+                        <td>
+                            <button type="submit" class=" mx-auto rounded w-24 py-2 bg-red-800 text-white cursor-pointer">Add</button>
                         </td>
                     </tr>
                 </form>
-                @else
-                <form method="POST" action="{{ url('/post/add') }}" autocomplete="off">
-                    @csrf
-                    <tr class="bg-gray-100 border-b border-gray-100 append-child relative hidden">
-                        <td class="bg-gray-300 text-purple-600 flex border-0 border-b-1 border-purple-600 border-l-8 flex justify-between items-center">
-                            <input name="title" class="h-full px-1 text-sm px-3 w-full rounded-lg" placeholder="Title">
-                            @error('title')
-                            <span class="invalid-feedback" role="alert">
-                                <strong>{{ $message }}</strong>
-                            </span>
-                            @enderror
-                        </td>
-                        <td>
-                            <div class="h-full bg-cover rounded-full mx-auto bg-gray-300 relative pic-wrapper" id="prof-img" style="background-image: url('images/persn.jpeg'); width: 40px">
-                                <ul class="absolute top-0 mt-12 shadow-xl -mr-2 right-0 w-48 bg-white dropdown z-50 capitalize hidden status_priority_dropdown rounded-lg" style="left:0;">
-                                    @if(count($members) > 0)
-                                    @foreach($members as $member)
-                                    <li value="{{ $member -> id }}" onclick="addPhoto({{$member}})" style="display: grid; grid-template-columns: max-content 1fr;" class="border-b border-gray-300 text-green-600 h-12 flex flex-start items-center px-4 cursor-pointer">
-                                        <span class=" rounded-full bg-cover block" style="background-image: url('{{ $member -> avatar }}'); width: 30px;height: 30px;"></span>
-                                        <p class="ml-3">{{ $member -> name }}</p>
-                                    </li>
-                                    @endforeach
-                                    @endif
-                                </ul>
-                                <input name="member_id" value="" id="people-id" type="text" class="hidden" />
-                            </div>
-                        </td>
-                        <td class="bg-green-500 text-white relative cursor-pointer status_priority_wrapper status_priority_wrapper55" onclick="handleDropdown(55)">
-                            <p class="text-white" id="ss">Not Started</p>
-                            <ul class="absolute top-0 mt-12 shadow-xl -ml-8 left-0 w-48 bg-white dropdown z-50 hidden status_priority_dropdown">
-                                @if(count($statuses) > 0)
-                                @foreach($statuses as $status)
-                                <li onclick="addStatus({{$status}})" class="border-b border-gray-300 py-3 flex flex-start items-center px-4 
-                                <?php if ($status->name === 'Done') {
-                                    echo 'text-green-600';
-                                }
-                                if ($status->name === 'Working On it') {
-                                    echo 'text-yellow-600';
-                                }
-                                if ($status->name === 'Stuck') {
-                                    echo 'text-red-600';
-                                } ?>">
-                                    <span class="w-4 h-4 rounded-full block mr-3 
-                                    <?php if ($status->name === 'Done') {
-                                        echo 'bg-green-600';
-                                    }
-                                    if ($status->name === 'Working On it') {
-                                        echo 'bg-yellow-600';
-                                    }
-                                    if ($status->name === 'Stuck') {
-                                        echo 'bg-red-600';
-                                    } ?>"></span>
-                                    <p value="{{ $status -> id }}">{{ $status -> name }}</p>
-                                </li>
-                                @endforeach
-                                @endif
-                            </ul>
-                            <input name="status_id" value="" id="status-id" type="text" class="hidden" />
-                        </td>
-                        <td>
-                            <span class="block mx-auto rounded-full h-6 w-6/7 bg-black overflow-hidden relative">
-                                <div class="bg-purple-600 w-1/6 h-full z-10 relative"></div>
-                                <div class="flex -mt-5 z-50 relative justify-center">
-                                    <input type="text" class="text-center text-white text-sm z-20 bg-transparent" id="datepicker1" disabled size="10" />
-                                    <input type="text" class="text-center text-white text-sm z-20  bg-transparent text-left -ml-20 pl-20" id="datepicker" size="9">
-                                </div>
-                                <p class="center text-white z-50">-</p>
-                            </span>
-                        </td>
-                        <td>
-                            <span class="block mx-auto rounded-full h-6 w-6/7 bg-black overflow-hidden relative">
-                                <div class="bg-purple-600 w-1/6 h-full z-10 relative"></div>
-                                <div class="flex -mt-5 z-50 relative justify-center">
-                                    <input type="text" class="text-center text-white text-sm z-20 bg-transparent" id="datepicker1" disabled size="10" />
-                                    <input name="datetimes" type="text" class="text-center text-white text-sm z-20  bg-transparent text-left -ml-20 pl-20" id="datepicker" size="9">
-                                </div>
-                                <p class="center text-white z-50">-</p>
-                            </span>
-                        </td>
-                        <td>
-                            <button name="submit" type="submit" class=" mx-auto rounded w-4/5 py-2 bg-red-800 text-white cursor-pointer">Add</button>
-                        </td>
-                    </tr>
-                </form>
-                @endif
 
 
             </tbody>
@@ -396,9 +332,10 @@
 
     </div>
 
+    @if(count($posts) > 0)
     <div class="fixed w-screen h-screen fixed top-0 left-0 z-50 bg-popup hidden" id="comment_wrapper">
-        <div class="center bg-white p-8 comment-popup align-left">
-            <div class="flex justify-end cross-div">
+        <div class="bg-white p-8 comment-popup align-left relative">
+            <div class="flex justify-end cross-div ">
                 <i class="fa fa-times text-lg cursor-pointer text-gray-700" aria-hidden="true" style="font-size: 1.5em"></i>
             </div>
             <form method="POST" class="full-width mb-10" action="{{ url('/comment/add/'.$post -> id) }}" id="Update_section">
@@ -418,9 +355,9 @@
                             </ul>
                             <input name="member_id" value="" id="commentMember-id" type="text" class="hidden" />
                         </div>
-                        <p class="ml-2 flex self-center" id="commentMember-name"></p>
+                        <p class="ml-2 flex self-center" id="commentMember-name">Select Member</p>
                     </div>
-                    <textarea type="text" name="comment" rows="4" class="w-full py-3 px-6 border border-gary-600 rounded-lg text-sm text-black outline-none focus:border-purple-600 overflow-hidden" placeholder="Write an Update...">            </textarea>
+                    <textarea type="text" name="comment" rows="4" class="w-full py-3 px-6 border border-gary-600 rounded-lg text-sm text-black outline-none focus:border-purple-600 overflow-hidden" placeholder="Write an Update..."></textarea>
                     <div class="flex justify-between items-center mt-4">
                         <button type="submit" class="rounded px-8  py-2 text-center bg-purple-600 text-white cursor-pointer justify-between outline-none">
                             Comment
@@ -451,6 +388,7 @@
             @endif
         </div>
     </div>
+    @endif
 
 
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>

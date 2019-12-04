@@ -20,6 +20,7 @@ class CreatePostsTable extends Migration
             $table->unsignedBigInteger('status_id');
             $table->string('due_date')->nullable()->default('');
             $table->string('time_tracking')->nullable()->default('');
+            $table->string('category')->nullable()->default('');
             $table->timestamps();
 
             $table->foreign('member_id')

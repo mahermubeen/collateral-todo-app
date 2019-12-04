@@ -39,15 +39,17 @@ class PostController extends Controller
         $this->validate($data, [
             'title' => ['required', 'string', 'max:255'],
             'member_id' => ['required'],
-            'status_id' => ['required'],
-            'datetimes' => ['required', 'string', 'max:255']
+            'status_id' => ['max:20'],
+            'datetimes' => ['required', 'string', 'max:255'],
+            'category' => ['required', 'string', 'max:255']
         ]);
 
         $data = array(
             'title'      =>  $data['title'],
             'member_id' => $data['member_id'],
             'status_id' => $data['status_id'],
-            'due_date' => $data['datetimes']
+            'due_date' => $data['datetimes'],
+            'category' => $data['category']
         );
 
         $info = $this->post->add($data);

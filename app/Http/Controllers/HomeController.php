@@ -10,7 +10,6 @@ use App\User;
 use App\Member;
 use App\Status;
 use DB;
-use Hamcrest\Core\HasToString;
 
 class HomeController extends Controller
 {

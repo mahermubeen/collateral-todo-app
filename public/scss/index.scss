@@ -54602,17 +54602,17 @@ input[type="range"]::-webkit-slider-thumb{
 
 
 .comment-popup{
-  position: relative;
   width: 80%;
   height: max-content;
   display: grid;
-  margin: 200px 0 100px;
+  margin: 100px auto 100px !important;
   display: block;
 }
 
 .cross-div{
-  position: sticky;
-  top: 0;
+  position: absolute;
+  top: 31px;
+  right: 40px;
 }
 
 #comment_wrapper{
@@ -54627,4 +54627,11 @@ input[type="range"]::-webkit-slider-thumb{
     min-width: 37px;
     padding: 2px;
     height: 2rem;
+}
+
+.datePicker{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  justify-content: center;
+  margin-top: -22px;
 }

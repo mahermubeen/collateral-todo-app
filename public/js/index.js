@@ -268,7 +268,7 @@ comment_wrapper_cross.addEventListener("click", function() {
     comment_wrapper.style.display = "none";
 });
 
-function dispatchTimer(date, elementId) {
+function dispatchTimer($from, $to) {
     //Set the date we're counting down to
     var countDownDate = new Date(date).getTime();
 
