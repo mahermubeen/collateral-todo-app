@@ -1,7 +1,7 @@
 <html lang="en">
 
 <head>
-    <title>Collateral | Manager</title>
+    <title>Collateral | Add Task</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
@@ -13,6 +13,9 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
+    <script type="text/javascript" src="http://www.datejs.com/build/date.js"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 
     <meta name="csrf-token" content="{{ csrf_token() }}" />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
@@ -41,9 +44,10 @@
                 </a>
             </div>
             @endif
-            <button class="rounded px-4 py-2 text-center border border-purple-600 text-purple-600 mr-3 bg-white-600 text-white outline-none cursor-pointer" id="add_task_btn">Add Task
+
+            <button class="rounded px-4 py-2 text-center bg-purple-600 text-white cursor-pointer mr-3 outline-none" id="manage_pupil_btn">Manage People
             </button>
-            <button class="rounded px-4 py-2 text-center bg-purple-600 text-white cursor-pointer outline-none" id="manage_pupil_btn">Manage People
+            <button class="rounded px-4 py-2 text-center border border-purple-600 text-purple-600  bg-white-600 text-white outline-none cursor-pointer" id="add_task_btn">Add Task
             </button>
         </div>
 
@@ -340,8 +344,8 @@
 
     @if(count($posts) > 0)
     <div class="fixed w-screen h-screen fixed top-0 left-0 z-50 bg-popup hidden" id="comment_wrapper">
-        <div class="bg-white p-8 comment-popup align-left relative">
-            <div class="flex justify-end cross-div ">
+        <div class="center bg-white p-8 comment-popup align-left">
+            <div class="flex justify-end cross-div">
                 <i class="fa fa-times text-lg cursor-pointer text-gray-700" aria-hidden="true" style="font-size: 1.5em"></i>
             </div>
             <form method="POST" class="full-width mb-10" action="{{ url('/comment/add/'.$post -> id) }}" id="Update_section">
@@ -374,24 +378,12 @@
                     </div>
                 </div>
             </form>
-            @if(count($comments) > 0)
-            @foreach($comments as $comment)
-            <article class="mb-10 p-6 border border-gary-600 rounded-lg m-bottom">
-                <div class="flex justify-between items-center">
-                    <a href="#" class="flex text-gray-500 hover:text-purple-600">
-                        <div class="h-12 w-12 bg-cover rounded-full mx-auto" style="background-image: url('{{ $comment-> memberss -> avatar }}')"></div>
-                        <p class="ml-2 flex self-center">{{ $comment-> memberss -> name }}</p>
-                    </a>
-                    <select class="select appearance-none py-1 pl-6 pr-8 outline-none text-gray-500 cursor-pointer">
-                        <option selected>{{ $comment -> created_at }}</option>
-                    </select>
-                </div>
-                <p class="text-base pt-6">
-                    {{ $comment -> comment }}
-                </p>
-            </article>
-            @endforeach
-            @endif
+
+            <div id="comments_article">
+
+            </div>
+
+
         </div>
     </div>
     @endif
@@ -479,43 +471,67 @@
                     success: function(response) {
 
                         var len = 0;
-                        $('#userTable tbody tr:not(:first)').empty(); // Empty <tbody>
+
                         if (response['data'] != null) {
-                            alert("success");
+                            console.log("data:", response['data']);
                             len = response['data'].length;
                         }
+                        console.log("length", len);
 
                         if (len > 0) {
                             for (var i = 0; i < len; i++) {
 
-                                var id = response['data'][i].id;
-                                var username = response['data'][i].username;
-                                var name = response['data'][i].name;
-                                var email = response['data'][i].email;
+                                var member_avatar = response['data'][i].memberss.avatar;
+                                var member_name = response['data'][i].memberss.name;
 
-                                var tr_str = "<tr>" +
-                                    "<td align='center'><input type='text' value='" + username + "' id='username_" + id + "' disabled></td>" +
-                                    "<td align='center'><input type='text' value='" + name + "' id='name_" + id + "'></td>" +
-                                    "<td align='center'><input type='email' value='" + email + "' id='email_" + id + "'></td>" +
-                                    "<td align='center'><input type='button' value='Update' class='update' data-id='" + id + "' ><input type='button' value='Delete' class='delete' data-id='" + id + "' ></td>" +
-                                    "</tr>";
+                                var comt_date = response['data'][i].created_at;
+                                comt_date = moment().format("MMM DD");
 
-                                $("#userTable tbody").append(tr_str);
+                                var comment_body = response['data'][i].comment;
+
+                                var tr_str = "<article class='mb-10 p-6 border border-gary-600 rounded-lg m-bottom'>" +
+                                    "<div class='flex justify-between items-center'>" +
+                                    "<a href='#' class='flex text-gray-500 hover:text-purple-600'>" +
+                                    '<div class="h-12 w-12 bg-cover rounded-full mx-auto" style="background-image: url' + "('" + member_avatar + "')" + '">' +
+                                    "</div>" +
+                                    "<p class='ml-2 flex self-center'>" + member_name + "</p>" +
+                                    "</a>" +
+                                    "<select class='select appearance-none py-1 pl-6 pr-8 outline-none text-gray-500 cursor-pointer'>" +
+                                    "<option>" + comt_date + "</option>" +
+                                    "</select>" +
+                                    "</div>" +
+                                    "<p class='text-base pt-6'>" + comment_body + "</p>" +
+                                    "</article>";
+
+                                $("#comments_article").append(tr_str);
 
                             }
                         } else {
-                            var tr_str = "<tr class='norecord'>" +
-                                "<td align='center' colspan='4'>No record found.</td>" +
-                                "</tr>";
+                            var tr_str = "<div class='flex justify-between items-center'>" +
+                                "<p>Sorry, No Comments Available!</p>" +
+                                "</div>";
 
-                            $("#userTable tbody").append(tr_str);
+                            $("#comments_article").append(tr_str);
                         }
 
                     }
                 });
             });
-
         })
+    </script>
+
+    <script>
+        var comment_wrapper = document.getElementById("comment_wrapper");
+        var comment_wrapper_cross = comment_wrapper.querySelector(".fa-times");
+        var comments = document.querySelectorAll(".chat-container");
+        for (var i = 0; i < comments.length; i++) {
+            comments[i].addEventListener("click", function() {
+                comment_wrapper.style.display = "block";
+            });
+        }
+        comment_wrapper_cross.addEventListener("click", function() {
+            comment_wrapper.style.display = "none";
+        });
     </script>
 
 </body>

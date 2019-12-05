@@ -65,20 +65,9 @@ class HomeController extends Controller
     // Fetch Comments Record for AJAX
     public function getComments($id)
     {
-        $aa = $id;
-
-        $commentsArr = [];
-
-        foreach ($aa as $bb) {
-            array_push($commentsArr, DB::table('comments')->where('member_id', $bb)->get());
-        }
-
-        // $comNo = json_encode($commentsArr);
-
-        // Call getuserData() method of Page Model
-        $commentsNO['data'] = $commentsArr;
-
-        return $commentsNO;
+        $comments['data'] = Comment::with('memberss')->where('member_id', $id)->get();
+        echo json_encode($comments);
+        exit;
     }
 
     // Update Status

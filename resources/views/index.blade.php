@@ -50,8 +50,8 @@
             @endif
             @if (Auth::check())
             <div class="flex mb-6 " id="loggedIn_btns">
-                <a class="rounded px-4 py-2 text-center bg-purple-600 text-white cursor-pointer justify-between outline-none" href="{{ url('/people') }}" id="check_pupil_btn">Check People</button>
-                    <a class="rounded px-4 py-2 text-center bg-white-600 border border-purple-600 ml-3 text-purple-600 cursor-pointer justify-between outline-none" href="{{ url('/dashboard') }}">Add New</a>
+                <!-- <a class="rounded px-4 py-2 text-center bg-purple-600 text-white cursor-pointer justify-between outline-none" href="{{ url('/people') }}" id="check_pupil_btn">Check People</button> -->
+                <a class="rounded px-4 py-2 text-center bg-purple-600 border border-purple-600 ml-3 text-white text-white-600 cursor-pointer justify-between outline-none" href="{{ url('/dashboard') }}">Add New</a>
             </div>
             @else
             <div class="flex mb-6" id="loggedOut_btns">
@@ -75,7 +75,7 @@
                 @if(count($posts) > 0)
                 @foreach($posts as $key => $post)
                 <tr class="bg-gray-100 border-b border-gray-100">
-                    <td onclick="showComments({{ $post }})" class="bg-gray-300 text-purple-600 flex border-0 border-b-1 border-purple-600 border-l-8 flex justify-between items-center chat-container">
+                    <td value="{{ $post->memberss->id }}" data-link="{{ url('/getComments/'. $post->memberss->id ) }}" data-token="{{ csrf_token() }}" class="bg-gray-300 text-purple-600 flex border-0 border-b-1 border-purple-600 border-l-8 flex justify-between items-center chat-container memberId">
                         {{ $post -> title }}
                         <div class="relative chat-wrapper cursor-pointer">
                             <i class="text-3xl text-gray-500 chat-icon far fa-comment"></i>
@@ -155,19 +155,19 @@
                         </span>
                     </td>
                     <td class="text-gray-600">
-                        <script>
-                            <?php
-                            $fromDate = $post->created_at;
-                            $date = new DateTime($fromDate);
-                            $from = $date->format('d');
+                        <?php
+                        $fromDate = $post->created_at;
+                        $date = new DateTime($fromDate);
+                        $from = (int) $date->format('d');
 
-                            $toDate = $post->due_date;
-                            $date1 = explode(" ", $toDate);
-                            $to = $date1[1];
+                        $toDate = $post->due_date;
+                        $date1 = explode(" ", $toDate);
+                        $to = (int) $date1[1];
 
-                            echo " ?> dispatchTimer($from, $to); <?php " ?>
-                        </script>
+                        $days = $to - $from;
 
+                        echo $days . " days";
+                        ?>
                     </td>
                     <td>
                         {{ $post -> category }}
@@ -217,35 +217,12 @@
                     </div>
                 </div>
             </form>
-            @if(count($comments) > 0)
-            @foreach($comments as $comment)
 
-            <article class="mb-10 p-6 border border-gary-600 rounded-lg m-bottom">
-                <div class="flex justify-between items-center">
-                    <a href="#" class="flex text-gray-500 hover:text-purple-600">
-                        <div class="h-12 w-12 bg-cover rounded-full mx-auto" style="background-image: url('{{ $comment-> memberss -> avatar }}')"></div>
-                        <p class="ml-2 flex self-center">{{ $comment-> memberss -> name }}</p>
-                    </a>
+            <div id="comments_article">
 
-                    <select class="select appearance-none py-1 pl-6 pr-8 outline-none text-gray-500 cursor-pointer">
-                        <option>
-                            <?php
-                            $source = $comment->created_at;
-                            $date = new DateTime($source);
-                            echo $date->format('M d');
-                            ?>
-                        </option>
-                    </select>
-                </div>
-                <p class="text-base pt-6">
+            </div>
 
-                    <p>{{ $comment -> comment }}</p>
 
-                </p>
-
-            </article>
-            @endforeach
-            @endif
         </div>
     </div>
     @endif
@@ -276,6 +253,7 @@
                 }
             });
             var CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
+
             // Update status
             $(document).on("click", "#status_id_li", function() {
                 var url = $(this).attr("data-link");
@@ -293,7 +271,7 @@
 
                 if (status_id != '') {
                     $.ajax({
-                        url: 'updateStatuss/' + post_id,
+                        url: 'updateStatus/' + post_id,
                         type: 'post',
                         data: {
                             _token: CSRF_TOKEN,
@@ -308,7 +286,72 @@
                 }
             });
 
+            //Fetch comments function 
+            $(document).on("click", ".memberId", function() {
+                var url = $(this).attr("data-link");
 
+                //add it to your data
+                var data = {
+                    _token: $(this).data('token'),
+                    testdata: 'testdatacontent'
+                }
+                var aa = $(this);
+
+                var member_id = aa[0].attributes[0].nodeValue;
+
+                $.ajax({
+                    url: 'getComments/' + member_id,
+                    type: 'get',
+                    dataType: 'json',
+                    success: function(response) {
+
+                        var len = 0;
+
+                        if (response['data'] != null) {
+                            console.log("data:", response['data']);
+                            len = response['data'].length;
+                        }
+                        console.log("length", len);
+
+                        if (len > 0) {
+                            for (var i = 0; i < len; i++) {
+
+                                var member_avatar = response['data'][i].memberss.avatar;
+                                var member_name = response['data'][i].memberss.name;
+
+                                var comt_date = response['data'][i].created_at;
+                                comt_date = moment().format("MMM DD");
+
+                                var comment_body = response['data'][i].comment;
+
+                                var tr_str = "<article class='mb-10 p-6 border border-gary-600 rounded-lg m-bottom'>" +
+                                    "<div class='flex justify-between items-center'>" +
+                                    "<a href='#' class='flex text-gray-500 hover:text-purple-600'>" +
+                                    '<div class="h-12 w-12 bg-cover rounded-full mx-auto" style="background-image: url' + "('" + member_avatar + "')" + '">' +
+                                    "</div>" +
+                                    "<p class='ml-2 flex self-center'>" + member_name + "</p>" +
+                                    "</a>" +
+                                    "<select class='select appearance-none py-1 pl-6 pr-8 outline-none text-gray-500 cursor-pointer'>" +
+                                    "<option>" + comt_date + "</option>" +
+                                    "</select>" +
+                                    "</div>" +
+                                    "<p class='text-base pt-6'>" + comment_body + "</p>" +
+                                    "</article>";
+
+                                $("#comments_article").append(tr_str);
+
+                            }
+                        } else {
+                            var tr_str = "<div class='flex justify-between items-center'>" +
+                                "<p>Sorry, No Comments Available!</p>" +
+                                "</div>";
+
+                            $("#comments_article").append(tr_str);
+                        }
+
+                    }
+                });
+            });
         })
     </script>
 

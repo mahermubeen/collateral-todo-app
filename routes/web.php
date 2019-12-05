@@ -13,6 +13,7 @@
 Route::get('/', 'LandingPageController@index');
 
 Route::post('memberId/{id}', 'LandingPageController@index1');
+
 Route::post('/updateStatuss/{id}', 'LandingPageController@updateStatus');
 
 
