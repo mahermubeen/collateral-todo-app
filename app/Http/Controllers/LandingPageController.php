@@ -39,7 +39,7 @@ class LandingPageController extends Controller
         $data['statuses'] = $this->status->get_statuses();
 
         $data['posts']      = Post::with('memberss', 'statusess')->get();
-        
+
         $data['comments']     = Comment::with('memberss')->get();
 
 
@@ -84,12 +84,31 @@ class LandingPageController extends Controller
         return view('index', $data);
     }
 
-    public function index1(Request $data){
-
-        $id = $data->input('memberId');
-
+    public function index1($id)
+    {
         $info['comments']     = Comment::with('memberss')->where('member_id', $id)->get();
 
-        redirect()->back()->with($info);
+        if ($info > 0)
+            return;
+    }
+
+    // Update Status
+    public function updateStatus(Request $request, $id)
+    {
+        $status_id = $request->input('status_id');
+
+
+        if ($status_id != '') {
+            $data = array('status_id' => $status_id);
+
+            // Call updateData() method of Comment Model
+            $id = $this->post->edit_posts($data, $id);
+            if ($id > 0)
+                return;
+        } else {
+            echo 'Fill all fields.';
+        }
+
+        exit;
     }
 }

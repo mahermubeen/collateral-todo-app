@@ -61,6 +61,47 @@ class HomeController extends Controller
         return view('pages.dashboard', $data);
     }
 
+
+    // Fetch Comments Record for AJAX
+    public function getComments($id)
+    {
+        $aa = $id;
+
+        $commentsArr = [];
+
+        foreach ($aa as $bb) {
+            array_push($commentsArr, DB::table('comments')->where('member_id', $bb)->get());
+        }
+
+        // $comNo = json_encode($commentsArr);
+
+        // Call getuserData() method of Page Model
+        $commentsNO['data'] = $commentsArr;
+
+        return $commentsNO;
+    }
+
+    // Update Status
+    public function updateStatus(Request $request, $id)
+    {
+        $status_id = $request->input('status_id');
+        
+
+        if ($status_id != '' ) {
+            $data = array('status_id' => $status_id);
+
+            // Call updateData() method of Comment Model
+            $id = $this->post->edit_posts($data, $id);
+            if($id > 0)
+                return;
+        } else {
+            echo 'Fill all fields.';
+        }
+
+        exit;
+    }
+
+
     public function people()
     {
         return view('pages.people');

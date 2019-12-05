@@ -13,10 +13,13 @@
 Route::get('/', 'LandingPageController@index');
 
 Route::post('memberId/{id}', 'LandingPageController@index1');
+Route::post('/updateStatuss/{id}', 'LandingPageController@updateStatus');
 
 
 Route::get('/dashboard', 'HomeController@dashboard');
 Route::get('/people', 'HomeController@people');
+Route::post('/updateStatus/{id}', 'HomeController@updateStatus');
+Route::get('/getComments/{id}', 'HomeController@getComments');
 
 Route::post('/member/add', 'MemberController@add_member');
 Route::get('/member/destroy/{id}', 'MemberController@destroy_member');

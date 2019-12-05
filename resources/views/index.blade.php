@@ -23,6 +23,8 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
 
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 </head>
 
 <body>
@@ -106,7 +108,7 @@
                         <ul class="absolute top-0 mt-12 shadow-xl ml-20 left-0 w-48 bg-white dropdown z-50 hidden status_priority_dropdown">
                             @if(count($statuses) > 0)
                             @foreach($statuses as $status)
-                            <li onclick="addStatus1({{ $status }}, {{ $post }})" class="border-b border-gray-300 py-3 flex flex-start items-center px-4 
+                            <li id="status_id_li" value="{{ $post->id }}" type="{{ $status->id }}" data-link="{{ url('/updateStatuss/'. $post->id ) }}" data-token="{{ csrf_token() }}" class="border-b border-gray-300 py-3 flex flex-start items-center px-4 
                                 <?php if ($status->name === 'Done') {
                                     echo 'text-green-600';
                                 }
@@ -133,6 +135,7 @@
                                         echo 'bg-blue-600';
                                     } ?>"></span>
                                 <p value="{{ $status -> id }}">{{ $status -> name }}</p>
+                                <input type="text" class="hidden" id="status_id_input" name="status_id" />
                             </li>
                             @endforeach
                             @endif
@@ -262,6 +265,53 @@
     </script>
 
     <script src="js/index.js"></script>
+
+    <!--AJAX Script -->
+    <script type='text/javascript'>
+        $(document).ready(function() {
+
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            var CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
+            // Update status
+            $(document).on("click", "#status_id_li", function() {
+                var url = $(this).attr("data-link");
+
+                //add it to your data
+                var data = {
+                    _token: $(this).data('token'),
+                    testdata: 'testdatacontent'
+                }
+                var aa = $(this);
+
+                var post_id = aa[0].parentNode.lastElementChild.attributes[1].nodeValue;
+
+                var status_id = aa[0].attributes[2].value;
+
+                if (status_id != '') {
+                    $.ajax({
+                        url: 'updateStatuss/' + post_id,
+                        type: 'post',
+                        data: {
+                            _token: CSRF_TOKEN,
+                            status_id: status_id
+                        },
+                        success: function(response) {
+                            exit;
+                        }
+                    });
+                } else {
+                    alert('Fill all fields');
+                }
+            });
+
+
+        })
+    </script>
+
 </body>
 
 </html>

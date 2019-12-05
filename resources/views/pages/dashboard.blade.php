@@ -13,6 +13,10 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
 </head>
 
 <body>
@@ -58,7 +62,7 @@
                 @if(count($posts) > 0)
                 @foreach($posts as $key => $post)
                 <tr class="bg-gray-100 border-b border-gray-100">
-                    <td onclick="showComments({{ $post }})" class="bg-gray-300 text-purple-600 flex border-0 border-b-1 border-purple-600 border-l-8 flex justify-between items-center chat-container">
+                    <td value="{{ $post->memberss->id }}" data-link="{{ url('/getComments/'. $post->memberss->id ) }}" data-token="{{ csrf_token() }}" class="bg-gray-300 text-purple-600 flex border-0 border-b-1 border-purple-600 border-l-8 flex justify-between items-center chat-container memberId">
                         {{ $post -> title }}
                         <div class="relative chat-wrapper cursor-pointer">
                             <i class="text-3xl text-gray-500 chat-icon far fa-comment"></i>
@@ -91,7 +95,7 @@
                         <ul class="absolute top-0 mt-12 shadow-xl ml-20 left-0 w-48 bg-white dropdown z-50 hidden status_priority_dropdown">
                             @if(count($statuses) > 0)
                             @foreach($statuses as $status)
-                            <li onclick="addStatus1({{ $status }}, {{ $post }})" class="border-b border-gray-300 py-3 flex flex-start items-center px-4 
+                            <li id="status_id_li" value="{{ $post->id }}" type="{{ $status->id }}" data-link="{{ url('/updateStatus/'. $post->id ) }}" data-token="{{ csrf_token() }}" class="border-b border-gray-300 py-3 flex flex-start items-center px-4 
                                 <?php if ($status->name === 'Done') {
                                     echo 'text-green-600';
                                 }
@@ -118,6 +122,7 @@
                                         echo 'bg-blue-600';
                                     } ?>"></span>
                                 <p value="{{ $status -> id }}">{{ $status -> name }}</p>
+                                <input type="text" class="hidden" id="status_id_input" name="status_id" />
                             </li>
                             @endforeach
                             @endif
@@ -125,8 +130,8 @@
                     </td>
                     <td>
                         <span class="block mx-auto rounded-full h-6 w-6/7 bg-black overflow-hidden relative">
-                            <div class="bg-purple-600 w-1/2 h-full z-10 relative"></div>
-                            <div class="text-center text-white text-sm z-20 center w-full">
+                            <div class="bg-purple-600 w-1/2 h-full z-0 relative"></div>
+                            <div class="text-center text-white text-sm z-0 center w-full">
                                 <?php
                                 $source = $post->created_at;
                                 $date = new DateTime($source);
@@ -137,18 +142,20 @@
                         </span>
                     </td>
                     <td class="text-gray-600">
-                        <script>
-                            <?php
-                            $fromDate = $post->created_at;
-                            $date = new DateTime($fromDate);
-                            $from = $date->format('d');
 
-                            $toDate = $post->due_date;
-                            $date1 = explode(" ", $toDate);
-                            $to = $date1[1];
+                        <?php
+                        $fromDate = $post->created_at;
+                        $date = new DateTime($fromDate);
+                        $from = (int) $date->format('d');
 
-                            echo " ?> dispatchTimer($from, $to); <?php " ?>
-                        </script>
+                        $toDate = $post->due_date;
+                        $date1 = explode(" ", $toDate);
+                        $to = (int) $date1[1];
+
+                        $days = $to - $from;
+
+                        echo $days . " days";
+                        ?>
 
                     </td>
                     <td>
@@ -245,7 +252,6 @@
                         </td>
                     </tr>
                 </form>
-
 
             </tbody>
         </table>
@@ -408,6 +414,108 @@
             $("#datepicker1").datepicker("option", "dateFormat", 'M d');
             $("#datepicker").datepicker("option", "dateFormat", 'M d');
         });
+    </script>
+
+    <!--AJAX Script -->
+    <script type='text/javascript'>
+        $(document).ready(function() {
+
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            var CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
+
+            // Update status
+            $(document).on("click", "#status_id_li", function() {
+                var url = $(this).attr("data-link");
+
+                //add it to your data
+                var data = {
+                    _token: $(this).data('token'),
+                    testdata: 'testdatacontent'
+                }
+                var aa = $(this);
+
+                var post_id = aa[0].parentNode.lastElementChild.attributes[1].nodeValue;
+
+                var status_id = aa[0].attributes[2].value;
+
+                if (status_id != '') {
+                    $.ajax({
+                        url: 'updateStatus/' + post_id,
+                        type: 'post',
+                        data: {
+                            _token: CSRF_TOKEN,
+                            status_id: status_id
+                        },
+                        success: function(response) {
+                            exit;
+                        }
+                    });
+                } else {
+                    alert('Fill all fields');
+                }
+            });
+
+            //Fetch comments function 
+            $(document).on("click", ".memberId", function() {
+                var url = $(this).attr("data-link");
+
+                //add it to your data
+                var data = {
+                    _token: $(this).data('token'),
+                    testdata: 'testdatacontent'
+                }
+                var aa = $(this);
+
+                var member_id = aa[0].attributes[0].nodeValue;
+
+                $.ajax({
+                    url: 'getComments/' + member_id,
+                    type: 'get',
+                    dataType: 'json',
+                    success: function(response) {
+
+                        var len = 0;
+                        $('#userTable tbody tr:not(:first)').empty(); // Empty <tbody>
+                        if (response['data'] != null) {
+                            alert("success");
+                            len = response['data'].length;
+                        }
+
+                        if (len > 0) {
+                            for (var i = 0; i < len; i++) {
+
+                                var id = response['data'][i].id;
+                                var username = response['data'][i].username;
+                                var name = response['data'][i].name;
+                                var email = response['data'][i].email;
+
+                                var tr_str = "<tr>" +
+                                    "<td align='center'><input type='text' value='" + username + "' id='username_" + id + "' disabled></td>" +
+                                    "<td align='center'><input type='text' value='" + name + "' id='name_" + id + "'></td>" +
+                                    "<td align='center'><input type='email' value='" + email + "' id='email_" + id + "'></td>" +
+                                    "<td align='center'><input type='button' value='Update' class='update' data-id='" + id + "' ><input type='button' value='Delete' class='delete' data-id='" + id + "' ></td>" +
+                                    "</tr>";
+
+                                $("#userTable tbody").append(tr_str);
+
+                            }
+                        } else {
+                            var tr_str = "<tr class='norecord'>" +
+                                "<td align='center' colspan='4'>No record found.</td>" +
+                                "</tr>";
+
+                            $("#userTable tbody").append(tr_str);
+                        }
+
+                    }
+                });
+            });
+
+        })
     </script>
 
 </body>

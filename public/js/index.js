@@ -220,9 +220,9 @@ function addStatus(status) {
     document.querySelector("#ss").innerText = status.name;
 }
 
-function addStatus1(status, post) {
-    document.querySelector("#statusValue" + post.id).innerText = status.name;
-}
+// function addStatus1(status) {
+//     document.querySelector("#status_id_input").value = status.id;
+// }
 
 function startTimer(post) {
     console.log("post", post);
@@ -256,17 +256,17 @@ $(function() {
     );
 });
 
-var comment_wrapper = document.getElementById("comment_wrapper");
-var comment_wrapper_cross = comment_wrapper.querySelector(".fa-times");
-var comments = document.querySelectorAll(".chat-container");
-for (var i = 0; i < comments.length; i++) {
-    comments[i].addEventListener("click", function() {
-        comment_wrapper.style.display = "block";
-    });
-}
-comment_wrapper_cross.addEventListener("click", function() {
-    comment_wrapper.style.display = "none";
-});
+// var comment_wrapper = document.getElementById("comment_wrapper");
+// var comment_wrapper_cross = comment_wrapper.querySelector(".fa-times");
+// var comments = document.querySelectorAll(".chat-container");
+// for (var i = 0; i < comments.length; i++) {
+//     comments[i].addEventListener("click", function() {
+//         comment_wrapper.style.display = "block";
+//     });
+// }
+// comment_wrapper_cross.addEventListener("click", function() {
+//     comment_wrapper.style.display = "none";
+// });
 
 function dispatchTimer($from, $to) {
     //Set the date we're counting down to

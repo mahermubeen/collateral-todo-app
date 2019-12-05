@@ -25,9 +25,9 @@ class Post extends Model
         return Post::find($id);
     }
 
-    public function edit_posts($data, $where)
+    public function edit_posts($data, $id)
     {
-        return Post::where($where)->update($data);
+        return Post::where('id', $id)->update($data);
     }
 
     public function delete_post($id)
