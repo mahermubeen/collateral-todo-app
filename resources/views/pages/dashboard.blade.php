@@ -20,6 +20,9 @@
     <meta name="csrf-token" content="{{ csrf_token() }}" />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
+    <script src="js/moment.js"></script>
+    <script src="js/moment-with-locales.js"></script>
+
 </head>
 
 <body>
@@ -65,6 +68,49 @@
             <tbody>
                 @if(count($posts) > 0)
                 @foreach($posts as $key => $post)
+                <div class="fixed w-screen h-screen fixed top-0 left-0 z-50 bg-popup hidden" id="comment_wrapper">
+                    <div class="center bg-white p-8 comment-popup align-left">
+                        <div class="flex justify-end cross-div">
+                            <i class="fa fa-times text-lg cursor-pointer text-gray-700" aria-hidden="true" style="font-size: 1.5em"></i>
+                        </div>
+                        <form method="POST" class="full-width mb-10" action="{{ url('/comment/add/'.$post -> id) }}" id="Update_section">
+                            @csrf
+                            <div class="mt-10 " id="Update_section">
+                                <div href="#" style="display: grid; grid-template-columns: max-content 1fr;" class="flex text-gray-500x my-4">
+                                    <div class="h-full bg-cover rounded-full mx-auto bg-gray-300 relative pic-wrapper" id="commentMember-img" style="background-image: url('images/persn.jpeg'); width: 40px; height: 40px;">
+                                        <ul class="absolute top-0 mt-12 shadow-xl -mr-2 right-0 w-48 bg-white dropdown z-50 capitalize hidden status_priority_dropdown rounded-lg" style="left:0;">
+                                            @if(count($members) > 0)
+                                            @foreach($members as $member)
+                                            <li value="{{ $member -> id }}" onclick="addCommentMemberId({{$member}})" style="display: grid; grid-template-columns: max-content 1fr;" class="border-b border-gray-300 text-green-600 h-12 flex flex-start items-center px-4 cursor-pointer">
+                                                <span class=" rounded-full bg-cover block" style="background-image: url('{{ $member -> avatar }}'); width: 30px;height: 30px;"></span>
+                                                <p class="ml-3">{{ $member -> name }}</p>
+                                            </li>
+                                            @endforeach
+                                            @endif
+                                        </ul>
+                                        <input name="member_id" value="" id="commentMember-id" type="text" class="hidden" />
+                                    </div>
+                                    <p class="ml-2 flex self-center" id="commentMember-name">Select Member</p>
+                                </div>
+                                <textarea type="text" name="comment" rows="4" class="w-full py-3 px-6 border border-gary-600 rounded-lg text-sm text-black outline-none focus:border-purple-600 overflow-hidden" placeholder="Write an Update..."></textarea>
+                                <div class="flex justify-between items-center mb-10 mt-4">
+                                    <button type="submit" class="rounded px-8  py-2 text-center bg-purple-600 text-white cursor-pointer justify-between outline-none">
+                                        Comment
+                                    </button>
+                                    <a href="#" class="text-sm block text-right text-gray-500 hover:text-purple-600">Write updates via
+                                        email <i class="fa fa-envelope ml-1" aria-hidden="true"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </form>
+
+                        <div id="comments_article">
+
+                        </div>
+
+
+                    </div>
+                </div>
                 <tr class="bg-gray-100 border-b border-gray-100">
                     <td value="{{ $post->memberss->id }}" data-link="{{ url('/getComments/'. $post->memberss->id ) }}" data-token="{{ csrf_token() }}" class="bg-gray-300 text-purple-600 flex border-0 border-b-1 border-purple-600 border-l-8 flex justify-between items-center chat-container memberId">
                         {{ $post -> title }}
@@ -134,33 +180,37 @@
                     </td>
                     <td>
                         <span class="block mx-auto rounded-full h-6 w-6/7 bg-black overflow-hidden relative">
-                            <div class="bg-purple-600 w-1/2 h-full z-0 relative"></div>
+                            <div class="bg-purple-600 h-full z-0 relative" <?php
+                                                                            $startDate = $post->created_at;
+                                                                            $startOf = new DateTime($startDate);
+
+                                                                            $endDate = $post->due_date;
+                                                                            $endOf = new DateTime($endDate);
+
+                                                                            $daysLeft = $startOf->diff($endOf)->format("%d");
+
+                                                                            $width = ($daysLeft / 100);
+
+                                                                            echo 'style="width: ' . $width . '%"';
+                                                                            ?>>
+                            </div>
                             <div class="text-center text-white text-sm z-0 center w-full">
                                 <?php
-                                $source = $post->created_at;
-                                $date = new DateTime($source);
-                                echo $date->format('M d');
-                                ?> -
-                                {{ $post -> due_date }}
+                                $startDate = $post->created_at;
+                                $date = new DateTime($startDate);
+                                $startOf = $date->format('M d');
+
+                                $endDate = $post->due_date;
+                                $date1 = new DateTime($endDate);
+                                $endOf = $date1->format('M d');
+
+                                echo $startOf . " - " . $endOf;
+                                ?>
                             </div>
                         </span>
                     </td>
-                    <td class="text-gray-600">
-
-                        <?php
-                        $fromDate = $post->created_at;
-                        $date = new DateTime($fromDate);
-                        $from = (int) $date->format('d');
-
-                        $toDate = $post->due_date;
-                        $date1 = explode(" ", $toDate);
-                        $to = (int) $date1[1];
-
-                        $days = $to - $from;
-
-                        echo $days . " days";
-                        ?>
-
+                    <td class="text-gray-600 times">
+                        {{ $post -> updated_at}}
                     </td>
                     <td>
                         {{ $post -> category }}
@@ -240,7 +290,7 @@
                                 <div class="bg-purple-600 w-1/6 h-full z-10 relative"></div>
                                 <div class="datePicker">
                                     <input type="text" class="text-center text-white text-sm z-20 bg-transparent" id="datepicker1" disabled size="10" />
-                                    <input name="datetimes" type="text" class="text-center text-white text-sm z-20  bg-transparent text-left -ml-20 pl-10" id="datepicker" size="9">
+                                    <input name="datetimes" type="text" class="text-center text-white text-sm z-20  bg-transparent text-left -ml-20 pl-16" id="datepicker" size="9">
                                 </div>
                                 <p class="center text-white z-50">-</p>
                             </span>
@@ -249,7 +299,7 @@
                             <input class="bg-transparent w-1/2" name="time" value="" type="text" disabled />
                         </td>
                         <td>
-                            <input name="category" class="h-full px-1 text-sm px-3 w-full rounded-lg" type="text" placeholder="Category" />
+                            <input name="category" type="text" class="h-full px-1 text-sm px-3 w-full rounded-lg" placeholder="Category" />
                         </td>
                         <td>
                             <button type="submit" class=" mx-auto rounded w-24 py-2 bg-red-800 text-white cursor-pointer">Add</button>
@@ -342,69 +392,26 @@
 
     </div>
 
-    @if(count($posts) > 0)
-    <div class="fixed w-screen h-screen fixed top-0 left-0 z-50 bg-popup hidden" id="comment_wrapper">
-        <div class="center bg-white p-8 comment-popup align-left">
-            <div class="flex justify-end cross-div">
-                <i class="fa fa-times text-lg cursor-pointer text-gray-700" aria-hidden="true" style="font-size: 1.5em"></i>
-            </div>
-            <form method="POST" class="full-width mb-10" action="{{ url('/comment/add/'.$post -> id) }}" id="Update_section">
-                @csrf
-                <div class="mt-10 " id="Update_section">
-                    <div href="#" style="display: grid; grid-template-columns: max-content 1fr;" class="flex text-gray-500x my-4">
-                        <div class="h-full bg-cover rounded-full mx-auto bg-gray-300 relative pic-wrapper" id="commentMember-img" style="background-image: url('images/persn.jpeg'); width: 40px; height: 40px;">
-                            <ul class="absolute top-0 mt-12 shadow-xl -mr-2 right-0 w-48 bg-white dropdown z-50 capitalize hidden status_priority_dropdown rounded-lg" style="left:0;">
-                                @if(count($members) > 0)
-                                @foreach($members as $member)
-                                <li value="{{ $member -> id }}" onclick="addCommentMemberId({{$member}})" style="display: grid; grid-template-columns: max-content 1fr;" class="border-b border-gray-300 text-green-600 h-12 flex flex-start items-center px-4 cursor-pointer">
-                                    <span class=" rounded-full bg-cover block" style="background-image: url('{{ $member -> avatar }}'); width: 30px;height: 30px;"></span>
-                                    <p class="ml-3">{{ $member -> name }}</p>
-                                </li>
-                                @endforeach
-                                @endif
-                            </ul>
-                            <input name="member_id" value="" id="commentMember-id" type="text" class="hidden" />
-                        </div>
-                        <p class="ml-2 flex self-center" id="commentMember-name">Select Member</p>
-                    </div>
-                    <textarea type="text" name="comment" rows="4" class="w-full py-3 px-6 border border-gary-600 rounded-lg text-sm text-black outline-none focus:border-purple-600 overflow-hidden" placeholder="Write an Update..."></textarea>
-                    <div class="flex justify-between items-center mt-4">
-                        <button type="submit" class="rounded px-8  py-2 text-center bg-purple-600 text-white cursor-pointer justify-between outline-none">
-                            Comment
-                        </button>
-                        <a href="#" class="text-sm block text-right text-gray-500 hover:text-purple-600">Write updates via
-                            email <i class="fa fa-envelope ml-1" aria-hidden="true"></i>
-                        </a>
-                    </div>
-                </div>
-            </form>
-
-            <div id="comments_article">
-
-            </div>
-
-
-        </div>
-    </div>
-    @endif
 
 
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
     <script src="js/index.js"></script>
+    <script src="js/moment.js"></script>
+    <script src="js/moment-with-locales.js"></script>
+
 
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <script>
+ 
         $(function() {
             // $("#datepicker").datepicker();
             var startDate = new Date();
 
             $("#datepicker").datepicker().datepicker("setDate", startDate);
             $("#datepicker1").datepicker().datepicker("setDate", startDate);
-            $("#datepicker1").datepicker("option", "dateFormat", 'M d');
-            $("#datepicker").datepicker("option", "dateFormat", 'M d');
         });
     </script>
 
@@ -412,6 +419,10 @@
     <script type='text/javascript'>
         $(document).ready(function() {
 
+            document.querySelectorAll('.times').forEach((node)=>{
+                node.innerHTML = moment(node.innerHTML).fromNow()
+            });
+            
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -419,7 +430,7 @@
             });
             var CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
 
-            // Update status
+            // Update status with current time
             $(document).on("click", "#status_id_li", function() {
                 var url = $(this).attr("data-link");
 
@@ -431,6 +442,8 @@
                 var aa = $(this);
 
                 var post_id = aa[0].parentNode.lastElementChild.attributes[1].nodeValue;
+
+                
 
                 var status_id = aa[0].attributes[2].value;
 
@@ -463,7 +476,7 @@
                 var aa = $(this);
 
                 var member_id = aa[0].attributes[0].nodeValue;
-
+                
                 $.ajax({
                     url: 'getComments/' + member_id,
                     type: 'get',
@@ -473,14 +486,12 @@
                         var len = 0;
 
                         if (response['data'] != null) {
-                            console.log("data:", response['data']);
                             len = response['data'].length;
                         }
-                        console.log("length", len);
-
+                        
                         if (len > 0) {
                             for (var i = 0; i < len; i++) {
-
+                                
                                 var member_avatar = response['data'][i].memberss.avatar;
                                 var member_name = response['data'][i].memberss.name;
 
@@ -517,6 +528,8 @@
                     }
                 });
             });
+
+
         })
     </script>
 

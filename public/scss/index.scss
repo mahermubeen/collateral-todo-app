@@ -54603,8 +54603,7 @@ input[type="range"]::-webkit-slider-thumb{
 
 .comment-popup{
   width: 80%;
-  height: max-content;
-  display: grid;
+  height: 100vh;
   margin: 100px auto 100px !important;
   display: block;
 }
@@ -54634,4 +54633,13 @@ input[type="range"]::-webkit-slider-thumb{
   grid-template-columns: 1fr 1fr;
   justify-content: center;
   margin-top: -22px;
+}
+
+#comments_article{
+  background: white;
+  padding: 0 30px 1px 30px;
+  width: calc(100vw - 279px);
+  position: relative;
+  left: -32px;
+  margin-bottom: 100px;
 }

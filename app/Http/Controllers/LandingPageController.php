@@ -12,6 +12,7 @@ use App\Status;
 use Illuminate\Support\Facades\DB;
 use MultipleIterator;
 use ArrayIterator;
+use PHPUnit\Framework\Constraint\Attribute;
 
 class LandingPageController extends Controller
 {
@@ -20,6 +21,22 @@ class LandingPageController extends Controller
     private $user;
     private $member;
     private $status;
+
+    public function group_by($key, $data)
+    {
+        $result = array();
+
+        foreach ($data as $val) {
+            if (array_key_exists($key, $val)) {
+                $result[$val[$key]][] = $val;
+            } else {
+                $result[""][] = $val;
+            }
+        }
+
+        return $result;
+    }
+
     /**
      * Create a new controller instance.
      *
@@ -44,53 +61,95 @@ class LandingPageController extends Controller
 
 
 
-        // $createdDate = Comment::pluck('created_at');
 
-        // $dateArr = [];
-
-        // $data['created_at'] = date_format($date,"M d");
-
-        // foreach ($createdDate as $date) {
-        //     array_push($dateArr, DB::table('comments')->where('member_id', $date)->count());
-        // }
-
-        // $data['commentDate'] = $dateArr;
-
+        $post_memberId = DB::table('posts')->pluck('member_id');
+        $mem = [];
+        foreach ($post_memberId as $id) {
+            array_push($mem, DB::table('members')->where('id', $id)->get());
+        }
+        $data['membersss'] = $mem;
+        // dd($data['members']);
 
 
         $post_memberId = DB::table('posts')->pluck('member_id');
+        $stat = [];
+        foreach ($post_memberId as $id) {
+            array_push($stat, DB::table('statuses')->where('id', $id)->get());
+        }
+        $data['statusss'] = $stat;
+        // dd($data['statusss'][0][0]);
+
 
         $countId = [];
-
         foreach ($post_memberId as $id) {
             array_push($countId, DB::table('comments')->where('member_id', $id)->count());
         }
-
         $data['counts'] = $countId;
 
-        $comments_arr = [];
 
+
+
+        $comments_arr = [];
         foreach ($post_memberId as $id) {
             array_push($comments_arr, Comment::with('memberss')->where('member_id', $id)->get());
         }
-
         $data['commentsNo'] = $comments_arr;
 
-        // dd($data['comments']);
 
-        // $data['postss'] = Post::with('commentss')->where('member_id', 1)->get();
 
+
+        // $postsss = [];
+        // foreach ($cat_col as $cat) {
+        //     array_push($postsss, DB::table('posts')->where('category', '=', $cat)->get());
+        // }
+
+
+        // $data['categories'] = "SELECT  id, title, member_id ,status_id , due_date, posts.category
+        // FROM posts
+        // INNER JOIN(
+        // SELECT category
+        // FROM posts
+        // GROUP BY category
+        // HAVING COUNT(title) >1
+        // )temp ON posts.category= temp.category";
+
+        // $cat_col = DB::table('posts')->pluck('category');
+
+        // $postsss = [];
+        // foreach ($cat_col as $cat) {
+        //     array_push(
+        //         $postsss,
+        //         DB::table('posts')
+        //             ->select(['title', 'category'])
+        //             ->join('posts', 'category', '=', $cat)
+        //             ->groupBy('category')
+        //             ->get()
+        //     );
+        // }
+
+        // $data['categories'] =  DB::select('id','title','member_id','status_id','due_date','posts.category')
+        //     ->from('posts')
+        //     ->join('posts', 'category', '=', $cat)
+        //     ->groupBy('category')
+        //     ->get();
+        $post_id = DB::table('posts')->pluck('id');
+        $data1 = Post::with('memberss', 'statusess')->get();
+        $postsArr = [];
+        foreach ($post_id as $id) {
+            array_push($postsArr,  $data1[$id - 1]->getAttributes());
+        }
+        $byGroup = self::group_by("category", $postsArr);
+        $data['categories'] = $byGroup;
+        // dd($data['categories']);
+
+        // $data1 = Post::with('memberss', 'statusess')->get();
+        // $data = $data1[$id]->getAttributes();
+        // dd($data);
 
         return view('index', $data);
     }
 
-    public function index1($id)
-    {
-        $info['comments']     = Comment::with('memberss')->where('member_id', $id)->get();
 
-        if ($info > 0)
-            return;
-    }
 
     // Update Status
     public function updateStatus(Request $request, $id)
@@ -109,6 +168,14 @@ class LandingPageController extends Controller
             echo 'Fill all fields.';
         }
 
+        exit;
+    }
+
+    // Fetch Comments Record for AJAX
+    public function getComments($id)
+    {
+        $comments['data'] = Comment::with('memberss')->where('member_id', $id)->get();
+        echo json_encode($comments);
         exit;
     }
 }

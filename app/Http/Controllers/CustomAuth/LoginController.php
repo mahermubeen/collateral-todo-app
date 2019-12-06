@@ -211,7 +211,7 @@ class LoginController extends Controller
 
         $request->session()->invalidate();
 
-        return $this->loggedOut($request) ?: redirect('/dashboard');
+        return $this->loggedOut($request) ?  redirect('/') : redirect('/dashboard');
     }
 
     /**
@@ -222,7 +222,7 @@ class LoginController extends Controller
      */
     protected function loggedOut(Request $request)
     {
-        return redirect('/');
+        
     }
 
     /**

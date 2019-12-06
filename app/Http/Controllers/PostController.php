@@ -40,7 +40,7 @@ class PostController extends Controller
             'title' => ['required', 'string', 'max:255'],
             'member_id' => ['required'],
             'status_id' => ['max:20'],
-            'datetimes' => ['required', 'string', 'max:255'],
+            'datetimes' => ['required'],
             'category' => ['required', 'string', 'max:255']
         ]);
 
