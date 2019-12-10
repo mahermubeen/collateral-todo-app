@@ -52,7 +52,7 @@ class LandingPageController extends Controller
 
     public function index()
     {
-        $data['members']  = $this->member->get_members();
+        $data['members'] = Member::with('comments', 'posts')->get();
         $data['statuses'] = $this->status->get_statuses();
 
         $data['posts']      = Post::with('memberss', 'statusess')->get();
@@ -97,54 +97,18 @@ class LandingPageController extends Controller
 
 
 
-
-        // $postsss = [];
-        // foreach ($cat_col as $cat) {
-        //     array_push($postsss, DB::table('posts')->where('category', '=', $cat)->get());
-        // }
-
-
-        // $data['categories'] = "SELECT  id, title, member_id ,status_id , due_date, posts.category
-        // FROM posts
-        // INNER JOIN(
-        // SELECT category
-        // FROM posts
-        // GROUP BY category
-        // HAVING COUNT(title) >1
-        // )temp ON posts.category= temp.category";
-
-        // $cat_col = DB::table('posts')->pluck('category');
-
-        // $postsss = [];
-        // foreach ($cat_col as $cat) {
-        //     array_push(
-        //         $postsss,
-        //         DB::table('posts')
-        //             ->select(['title', 'category'])
-        //             ->join('posts', 'category', '=', $cat)
-        //             ->groupBy('category')
-        //             ->get()
-        //     );
-        // }
-
-        // $data['categories'] =  DB::select('id','title','member_id','status_id','due_date','posts.category')
-        //     ->from('posts')
-        //     ->join('posts', 'category', '=', $cat)
-        //     ->groupBy('category')
-        //     ->get();
-        $post_id = DB::table('posts')->pluck('id');
         $data1 = Post::with('memberss', 'statusess')->get();
+        $data2 = $data1->toArray();
         $postsArr = [];
-        foreach ($post_id as $id) {
-            array_push($postsArr,  $data1[$id - 1]->getAttributes());
+        foreach ($data2 as $index => $counter) {
+            array_push($postsArr,  $data1[$index]->getAttributes());
         }
         $byGroup = self::group_by("category", $postsArr);
         $data['categories'] = $byGroup;
+
         // dd($data['categories']);
 
-        // $data1 = Post::with('memberss', 'statusess')->get();
-        // $data = $data1[$id]->getAttributes();
-        // dd($data);
+
 
         return view('index', $data);
     }
@@ -163,7 +127,7 @@ class LandingPageController extends Controller
             // Call updateData() method of Comment Model
             $id = $this->post->edit_posts($data, $id);
             if ($id > 0)
-                return;
+                return redirect('/dashboard');
         } else {
             echo 'Fill all fields.';
         }

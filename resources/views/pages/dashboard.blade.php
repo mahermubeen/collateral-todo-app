@@ -1,7 +1,7 @@
 <html lang="en">
 
 <head>
-    <title>Collateral | Add Task</title>
+    <title>Collateral</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
@@ -47,11 +47,16 @@
                 </a>
             </div>
             @endif
-
+            @if(count($posts) > 0)
+            <button class="bg-red-800 cursor-pointer mr-3 outline-none px-2 rounded text-white">
+                <a href="{{ url('/destroy/posts') }}">Delete All</a>
+            </button>
+            @endif
             <button class="rounded px-4 py-2 text-center bg-purple-600 text-white cursor-pointer mr-3 outline-none" id="manage_pupil_btn">Manage People
             </button>
             <button class="rounded px-4 py-2 text-center border border-purple-600 text-purple-600  bg-white-600 text-white outline-none cursor-pointer" id="add_task_btn">Add Task
             </button>
+
         </div>
 
         <table class="w-full">
@@ -61,8 +66,9 @@
                     <th width="5%">People</th>
                     <th width="15%">Status</th>
                     <th width="15%">Timeline</th>
-                    <th width="13%">Time Tracking</th>
-                    <th width="20%">Category</th>
+                    <th>Time Tracking</th>
+                    <th>Category</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -115,9 +121,10 @@
                     <td value="{{ $post->memberss->id }}" data-link="{{ url('/getComments/'. $post->memberss->id ) }}" data-token="{{ csrf_token() }}" class="bg-gray-300 text-purple-600 flex border-0 border-b-1 border-purple-600 border-l-8 flex justify-between items-center chat-container memberId">
                         {{ $post -> title }}
                         <div class="relative chat-wrapper cursor-pointer">
+
                             <i class="text-3xl text-gray-500 chat-icon far fa-comment"></i>
                             <div class="w-4 h-4 rounded-full text-xs bg-gray-500 text-white absolute bottom-0 right-0 pointer-events-none">
-                                {{ $counts[$key] }}
+                               {{ $members[$post->member_id-1]->comments->count() }} 
                             </div>
                         </div>
                     </td>
@@ -209,11 +216,23 @@
                             </div>
                         </span>
                     </td>
-                    <td class="text-gray-600 times">
+                    @if($post->statusess->name === "Not Started")
+                    <td></td>
+                    @else
+                    <td class="text-gray-600 times text-sm">
                         {{ $post -> updated_at}}
                     </td>
+                    @endif
+
+
                     <td>
                         {{ $post -> category }}
+                    </td>
+                    <td>
+                        <button class=" mx-auto rounded w-4/5 py-2 bg-red-800 text-white cursor-pointer outline-none">
+
+                            <a href="{{ url('/post/destroy/'.$post -> id) }}">Delete</a>
+                        </button>
                     </td>
                 </tr>
                 @endforeach
@@ -287,7 +306,7 @@
                         </td>
                         <td>
                             <span class="block mx-auto rounded-full h-6 w-6/7 bg-black overflow-hidden relative">
-                                <div class="bg-purple-600 w-1/6 h-full z-10 relative"></div>
+                                <div class="bg-purple-600 w-0 h-full z-10 relative"></div>
                                 <div class="datePicker">
                                     <input type="text" class="text-center text-white text-sm z-20 bg-transparent" id="datepicker1" disabled size="10" />
                                     <input name="datetimes" type="text" class="text-center text-white text-sm z-20  bg-transparent text-left -ml-20 pl-16" id="datepicker" size="9">
@@ -295,14 +314,11 @@
                                 <p class="center text-white z-50">-</p>
                             </span>
                         </td>
-                        <td>
-                            <input class="bg-transparent w-1/2" name="time" value="" type="text" disabled />
-                        </td>
-                        <td>
+                        <td colspan="2">
                             <input name="category" type="text" class="h-full px-1 text-sm px-3 w-full rounded-lg" placeholder="Category" />
                         </td>
                         <td>
-                            <button type="submit" class=" mx-auto rounded w-24 py-2 bg-red-800 text-white cursor-pointer">Add</button>
+                            <button type="submit" class="bg-red-800 cursor-pointer mx-auto px-5 py-2 rounded text-white">Add</button>
                         </td>
                     </tr>
                 </form>
@@ -346,7 +362,7 @@
                                 <div class="h-full bg-cover rounded-full mx-auto" style="background-image: url('{{ $member->avatar }}'); width: 40px"></div>
                             </td>
                             <td>
-                                <button class=" mx-auto rounded w-4/5 py-2 bg-red-800 text-white cursor-pointer outline-none">
+                                <button class="bg-red-800 cursor-pointer mx-auto px-5 py-2 rounded text-white">
 
                                     <a href="{{ url('/member/destroy/'.$member -> id) }}">Delete</a>
                                 </button>
@@ -405,7 +421,6 @@
     <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <script>
- 
         $(function() {
             // $("#datepicker").datepicker();
             var startDate = new Date();
@@ -419,10 +434,10 @@
     <script type='text/javascript'>
         $(document).ready(function() {
 
-            document.querySelectorAll('.times').forEach((node)=>{
+            document.querySelectorAll('.times').forEach((node) => {
                 node.innerHTML = moment(node.innerHTML).fromNow()
             });
-            
+
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -443,7 +458,7 @@
 
                 var post_id = aa[0].parentNode.lastElementChild.attributes[1].nodeValue;
 
-                
+
 
                 var status_id = aa[0].attributes[2].value;
 
@@ -456,7 +471,7 @@
                             status_id: status_id
                         },
                         success: function(response) {
-                            exit;
+                            location.reload();
                         }
                     });
                 } else {
@@ -476,7 +491,7 @@
                 var aa = $(this);
 
                 var member_id = aa[0].attributes[0].nodeValue;
-                
+
                 $.ajax({
                     url: 'getComments/' + member_id,
                     type: 'get',
@@ -488,10 +503,10 @@
                         if (response['data'] != null) {
                             len = response['data'].length;
                         }
-                        
+
                         if (len > 0) {
                             for (var i = 0; i < len; i++) {
-                                
+
                                 var member_avatar = response['data'][i].memberss.avatar;
                                 var member_name = response['data'][i].memberss.name;
 
@@ -544,6 +559,7 @@
         }
         comment_wrapper_cross.addEventListener("click", function() {
             comment_wrapper.style.display = "none";
+            document.querySelector('#comments_article').innerHTML = " ";
         });
     </script>
 

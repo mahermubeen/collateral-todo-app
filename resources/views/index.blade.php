@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>Colllateral | Dashboard</title>
+    <title>Colllateral</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
@@ -51,6 +51,7 @@
             @if (Auth::check())
             <div class="flex mb-6 " id="loggedIn_btns">
                 <!-- <a class="rounded px-4 py-2 text-center bg-purple-600 text-white cursor-pointer justify-between outline-none" href="{{ url('/people') }}" id="check_pupil_btn">Check People</button> -->
+
                 <a class="rounded px-4 py-2 text-center bg-purple-600 border border-purple-600 ml-3 text-white text-white-600 cursor-pointer justify-between outline-none" href="{{ url('/dashboard') }}">Add New</a>
             </div>
             @else
@@ -59,10 +60,12 @@
             </div>
             @endif
         </div>
+
+
         @if(count($categories) > 0)
         @foreach($categories as $key => $category)
         <h2 class="text-2xl uppercase">
-            {{ $key}}
+            {{ $key }}
         </h2>
         <table class="mb-10 w-full">
             <thead>
@@ -71,10 +74,12 @@
                     <th width="5%">People</th>
                     <th width="15%">Status</th>
                     <th width="15%">Timeline</th>
-                    <th width="13%">Time Tracking</th>
+                    <th>Time Tracking</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
+
                 @foreach($category as $key => $post)
                 <div class="fixed w-screen h-screen fixed top-0 left-0 z-50 bg-popup hidden" id="comment_wrapper">
                     <div class="center bg-white p-8 comment-popup align-left">
@@ -117,13 +122,14 @@
                         </div>
                     </div>
                 </div>
+
                 <tr class="bg-gray-100 border-b border-gray-100">
                     <td value="{{ $members->find($post['member_id'])->id }}" data-link="{{ url('/getComments/'. $members->find($post['member_id'])->id ) }}" data-token="{{ csrf_token() }}" class="bg-gray-300 text-purple-600 flex border-0 border-b-1 border-purple-600 border-l-8 flex justify-between items-center chat-container memberId">
                         {{ $post['title'] }}
                         <div class="relative chat-wrapper cursor-pointer">
                             <i class="text-3xl text-gray-500 chat-icon far fa-comment"></i>
                             <div class="w-4 h-4 rounded-full text-xs bg-gray-500 text-white absolute bottom-0 right-0 pointer-events-none">
-                                {{ $counts[$key] }}
+                                {{ $members[$post['member_id']-1]->comments->count() }}
                             </div>
                         </div>
                     </td>
@@ -131,23 +137,21 @@
                         <div class="h-full bg-cover rounded-full mx-auto relative pic-wrapper" style="background-image: url('{{ $members->find($post['member_id'])->avatar }}'); width: 40px">
                         </div>
                     </td>
-                    </td>
+
                     <td class="text-white relative cursor-pointer status_priority_wrapper status_priority_wrapper{{ $post['id']-1 }}
                         <?php
-                        if ($statuses[$key]['name'] === 'Done') {
+                        if ($statuses->find($post['status_id'])->name === 'Not Started') {
+                            echo 'bg-blue-600';
+                        } else if ($statuses->find($post['status_id'])->name === 'Done') {
                             echo 'bg-green-600';
-                        }
-                        if ($statuses[$key]['name'] === 'Working On it') {
+                        } else if ($statuses->find($post['status_id'])->name === 'Working On it') {
                             echo 'bg-yellow-600';
-                        }
-                        if ($statuses[$key]['name'] === 'Stuck') {
+                        } else if ($statuses->find($post['status_id'])->name === 'Stuck') {
                             echo 'bg-red-600';
                         }
-                        if ($statuses[$key]['name'] === 'Not Started') {
-                            echo 'bg-blue-600';
-                        } ?>      
+                        ?>      
                         " onclick="handleDropdown({{ $post['id']-1 }})">
-                        <p class="text-white" value="{{ $statuses[$key]['id'] }}" id="statusValue{{ $post['id'] }}">{{ $statuses[$key]['name'] }}</p>
+                        <p class="text-white" id="statusValue{{ $post['id'] }}">{{ $statuses->find($post['status_id'])->name }}</p>
                         <ul class="absolute top-0 mt-12 shadow-xl ml-20 left-0 w-48 bg-white dropdown z-50 hidden status_priority_dropdown">
                             @if(count($statuses) > 0)
                             @foreach($statuses as $status)
@@ -215,8 +219,18 @@
                             </div>
                         </span>
                     </td>
-                    <td class="text-gray-600 times">
+                    @if($statuses->find($post['status_id'])->name === "Not Started")
+                    <td></td>
+                    @else
+                    <td class="text-gray-600 times text-sm">
                         {{ $post['updated_at'] }}
+                    </td>
+                    @endif
+                    <td>
+                        <button class="bg-red-800 cursor-pointer mx-auto px-5 py-2 rounded text-white">
+
+                            <a href="{{ url('/post/destroy/'.$post['id']) }}">Delete</a>
+                        </button>
                     </td>
                 </tr>
 
@@ -287,7 +301,7 @@
                             status_id: status_id
                         },
                         success: function(response) {
-                            exit;
+                            location.reload();
                         }
                     });
                 } else {

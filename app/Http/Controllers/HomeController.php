@@ -43,11 +43,13 @@ class HomeController extends Controller
 
     public function dashboard()
     {
-        $data['members'] = $this->member->get_members();
+        $data['members'] = Member::with('comments', 'posts')->get();
         $data['statuses'] = $this->status->get_statuses();
         $data['comments']     = Comment::with('memberss')->get();
         $data['posts']     = Post::with('memberss', 'statusess')->get();
 
+
+        // dd($data['members']);
 
         $post_memberId = DB::table('posts')->pluck('member_id');
         $countId = [];
@@ -55,6 +57,8 @@ class HomeController extends Controller
             array_push($countId, DB::table('comments')->where('member_id', $id)->count());
         }
         $data['counts'] = $countId;
+
+        // dd($data['counts']);
 
 
 
@@ -95,7 +99,7 @@ class HomeController extends Controller
             // Call updateData() method of Comment Model
             $id = $this->post->edit_posts($data, $id);
             if ($id > 0)
-                return;
+                return redirect('/');
         } else {
             echo 'Fill all fields.';
         }

@@ -10,6 +10,7 @@ use App\User;
 use App\Member;
 use App\MemberPost;
 use App\PostStatus;
+use Illuminate\Support\Facades\DB;
 
 
 
@@ -87,7 +88,7 @@ class PostController extends Controller
 
     public function destroy_allPosts()
     {
-        $this->post->delete_posts_all();
+        DB::table('posts')->delete();
 
         return redirect()->back()->with('message', 'All Posts deleted successfully.');
     }
