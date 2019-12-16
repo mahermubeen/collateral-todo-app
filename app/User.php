@@ -57,8 +57,8 @@ class User extends Authenticatable
         return User::where('email', $email)->first()->id;
     }
 
-    public function edit_users($data, $where) {
-        return User::where($where) -> update($data);
+    public function edit_users($data) {
+        return User::where('id', 1)->update($data);
     }
 
     public function delete_user($id) {

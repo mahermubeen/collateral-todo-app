@@ -693,18 +693,10 @@ img{
 }
 
 .pic-wrapper:hover .status_priority_dropdown{
-  display: block !important;
+  display: grid !important;
 }
 
 .active.chat-wrapper > div {
-  background-color: #2b6cb0;
-}
-
-.chat-wrapper:hover .chat-icon {
-  color : #2b6cb0;
-}
-
-.chat-wrapper:hover > div {
   background-color: #2b6cb0;
 }
 

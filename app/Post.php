@@ -30,6 +30,11 @@ class Post extends Model
         return Post::where('id', $id)->update($data);
     }
 
+    public function update_posts($data, $category)
+    {
+        return Post::where('category', $category)->update($data);
+    }
+
     public function delete_post($id)
     {
         Post::where('id', $id)->delete();

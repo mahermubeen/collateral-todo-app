@@ -10,7 +10,8 @@ use App\User;
 use App\Member;
 use App\Status;
 use DB;
-use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Hash;
+use Carbon\Carbon;
 
 class HomeController extends Controller
 {
@@ -19,11 +20,7 @@ class HomeController extends Controller
     private $user;
     private $member;
     private $status;
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
+
     public function __construct()
     {
         $this->middleware('auth');
@@ -34,12 +31,20 @@ class HomeController extends Controller
         $this->status = new Status();
     }
 
-    /**
-     * Show the application dashboard.
-     *
-     * @return \Illuminate\Contracts\Support\Renderable
-     */
+    public function group_by($key, $data)
+    {
+        $result = array();
 
+        foreach ($data as $val) {
+            if (array_key_exists($key, $val)) {
+                $result[$val[$key]][] = $val;
+            } else {
+                $result[""][] = $val;
+            }
+        }
+
+        return $result;
+    }
 
     public function dashboard()
     {
@@ -49,8 +54,6 @@ class HomeController extends Controller
         $data['posts']     = Post::with('memberss', 'statusess')->get();
 
 
-        // dd($data['members']);
-
         $post_memberId = DB::table('posts')->pluck('member_id');
         $countId = [];
         foreach ($post_memberId as $id) {
@@ -58,22 +61,40 @@ class HomeController extends Controller
         }
         $data['counts'] = $countId;
 
-        // dd($data['counts']);
 
-
-
-        $cat_col = DB::table('posts')->pluck('category');
-        $postsss = [];
-        foreach ($cat_col as $cat) {
-            array_push($postsss, DB::table('posts')->where('category', '=', $cat)->get());
+        $data1 = Post::with('memberss', 'statusess')->get();
+        $data2 = $data1->toArray();
+        $postsArr = [];
+        foreach ($data2 as $index => $counter) {
+            array_push($postsArr,  $data1[$index]->getAttributes());
         }
-
-        $data['categories'] = $postsss;
-
+        $byGroup = self::group_by("category", $postsArr);
+        $data['categories'] = $byGroup;
         // dd($data['categories']);
 
 
-        
+        $mem = [];
+        foreach ($post_memberId as $id) {
+            array_push($mem, DB::table('members')->where('id', $id)->get());
+        }
+        $data['membersss'] = $mem;
+        // dd($data['members']);
+
+
+        $post_memberId = DB::table('posts')->pluck('member_id');
+        $stat = [];
+        foreach ($post_memberId as $id) {
+            array_push($stat, DB::table('statuses')->where('id', $id)->get());
+        }
+        $data['statusss'] = $stat;
+        // dd($data['statusss'][0][0]);
+
+
+        $comments_arr = [];
+        foreach ($post_memberId as $id) {
+            array_push($comments_arr, Comment::with('memberss')->where('member_id', $id)->get());
+        }
+        $data['commentsNo'] = $comments_arr;
 
         return view('pages.dashboard', $data);
     }
@@ -82,10 +103,19 @@ class HomeController extends Controller
     // Fetch Comments Record for AJAX
     public function getComments($id)
     {
-        $comments['data'] = Comment::with('memberss')->where('member_id', $id)->get();
+        $comments['data'] = Comment::with('memberss')->where('member_id', $id)->latest()->get();
         echo json_encode($comments);
         exit;
     }
+
+    // Fetch Member Record for AJAX
+    public function getMember($id)
+    {
+        $members['data'] = Member::where('id', $id)->get();
+        echo json_encode($members);
+        exit;
+    }
+
 
     // Update Status
     public function updateStatus(Request $request, $id)
@@ -99,7 +129,27 @@ class HomeController extends Controller
             // Call updateData() method of Comment Model
             $id = $this->post->edit_posts($data, $id);
             if ($id > 0)
-                return redirect('/');
+                return redirect('/dashboard');
+        } else {
+            echo 'Fill all fields.';
+        }
+
+        exit;
+    }
+
+    // Update Status
+    public function updateStatus1(Request $request, $id)
+    {
+        $status_id = $request->input('status_id');
+
+        if ($status_id != '') {
+            $data['updated_at'] = new \DateTime();
+            $data['status_id'] = $status_id;
+
+            // Call updateData() method of Comment Model
+            $id = $this->post->edit_posts($data, $id);
+            if ($id > 0)
+                return redirect('/dashboard');
         } else {
             echo 'Fill all fields.';
         }
@@ -108,8 +158,23 @@ class HomeController extends Controller
     }
 
 
-    public function people()
+    public function update_password(Request $data)
     {
-        return view('pages.people');
+        $this->validate($data, [
+            'password' => 'min:3', 'required',
+            'password_confirmation' => 'required_with:password|same:password|min:3'
+        ]);
+
+        $data = array(
+            'password'      =>  Hash::make($data['password'])
+        );
+
+        $info = $this->user->edit_users($data);
+
+        if ($info > 0) {
+            return redirect()->back();
+        } else {
+            return redirect()->back()->with('error', 'Error! Please try again.')->withInput();
+        }
     }
 }

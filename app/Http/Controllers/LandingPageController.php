@@ -120,14 +120,34 @@ class LandingPageController extends Controller
     {
         $status_id = $request->input('status_id');
 
-
         if ($status_id != '') {
-            $data = array('status_id' => $status_id);
+            $data['created_at'] = new \DateTime();
+            $data['status_id'] = $status_id;
 
             // Call updateData() method of Comment Model
             $id = $this->post->edit_posts($data, $id);
             if ($id > 0)
-                return redirect('/dashboard');
+                return redirect('/');
+        } else {
+            echo 'Fill all fields.';
+        }
+
+        exit;
+    }
+
+    // Update Status1
+    public function updateStatus1(Request $request, $id)
+    {
+        $status_id = $request->input('status_id');
+
+        if ($status_id != '') {
+            $data['updated_at'] = new \DateTime();
+            $data['status_id'] = $status_id;
+
+            // Call updateData() method of Comment Model
+            $id = $this->post->edit_posts($data, $id);
+            if ($id > 0)
+                return redirect('/');
         } else {
             echo 'Fill all fields.';
         }
@@ -138,7 +158,7 @@ class LandingPageController extends Controller
     // Fetch Comments Record for AJAX
     public function getComments($id)
     {
-        $comments['data'] = Comment::with('memberss')->where('member_id', $id)->get();
+        $comments['data'] = Comment::with('memberss')->where('member_id', $id)->latest()->get();
         echo json_encode($comments);
         exit;
     }

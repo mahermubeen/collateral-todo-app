@@ -25,6 +25,10 @@
 
     <meta name="csrf-token" content="{{ csrf_token() }}" />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+    <script src="js/moment.js"></script>
+    <script src="js/moment-with-locales.js"></script>
+    <script src="js/moment-timezone.min.js"></script>
 </head>
 
 <body>
@@ -51,12 +55,11 @@
             @if (Auth::check())
             <div class="flex mb-6 " id="loggedIn_btns">
                 <!-- <a class="rounded px-4 py-2 text-center bg-purple-600 text-white cursor-pointer justify-between outline-none" href="{{ url('/people') }}" id="check_pupil_btn">Check People</button> -->
-
                 <a class="rounded px-4 py-2 text-center bg-purple-600 border border-purple-600 ml-3 text-white text-white-600 cursor-pointer justify-between outline-none" href="{{ url('/dashboard') }}">Add New</a>
             </div>
             @else
             <div class="flex mb-6" id="loggedOut_btns">
-                <a class="rounded px-8 ml-3 py-2 text-center bg-purple-600 text-white cursor-pointer justify-between outline-none" href="{{ url('login') }}">Sign In</a>
+                <a class="rounded px-8 ml-3 py-2 text-center bg-purple-600 text-white cursor-pointer justify-between outline-none" href="{{ url('login') }}">Admin Login</a>
             </div>
             @endif
         </div>
@@ -70,17 +73,17 @@
         <table class="mb-10 w-full">
             <thead>
                 <tr>
-                    <th width="25%" class="text-purple-600 text-xl text-left">This Week's Status</th>
+                    <th class="text-purple-600 text-xl text-left">Today's Tasks</th>
                     <th width="5%">People</th>
-                    <th width="15%">Status</th>
-                    <th width="15%">Timeline</th>
+                    <th width="20%">Status</th>
+                    <th>Timeline</th>
                     <th>Time Tracking</th>
-                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
 
                 @foreach($category as $key => $post)
+                @if($post['title'] != null)
                 <div class="fixed w-screen h-screen fixed top-0 left-0 z-50 bg-popup hidden" id="comment_wrapper">
                     <div class="center bg-white p-8 comment-popup align-left">
                         <div class="flex justify-end cross-div">
@@ -90,7 +93,7 @@
                             @csrf
                             <div class="mt-10 " id="Update_section">
                                 <div href="#" style="display: grid; grid-template-columns: max-content 1fr;" class="flex text-gray-500x my-4">
-                                    <div class="h-full bg-cover rounded-full mx-auto bg-gray-300 relative pic-wrapper" id="commentMember-img" style="background-image: url('images/persn.jpeg'); width: 40px; height: 40px;">
+                                    <div class="h-full bg-cover rounded-full mx-auto bg-gray-300 relative pic-wrapper" id="commentMember-img" style="background-image: url('images/person.jpeg'); width: 40px; height: 40px;">
                                         <ul class="absolute top-0 mt-12 shadow-xl -mr-2 right-0 w-48 bg-white dropdown z-50 capitalize hidden status_priority_dropdown rounded-lg" style="left:0;">
                                             @if(count($members) > 0)
                                             @foreach($members as $member)
@@ -127,9 +130,17 @@
                     <td value="{{ $members->find($post['member_id'])->id }}" data-link="{{ url('/getComments/'. $members->find($post['member_id'])->id ) }}" data-token="{{ csrf_token() }}" class="bg-gray-300 text-purple-600 flex border-0 border-b-1 border-purple-600 border-l-8 flex justify-between items-center chat-container memberId">
                         {{ $post['title'] }}
                         <div class="relative chat-wrapper cursor-pointer">
-                            <i class="text-3xl text-gray-500 chat-icon far fa-comment"></i>
-                            <div class="w-4 h-4 rounded-full text-xs bg-gray-500 text-white absolute bottom-0 right-0 pointer-events-none">
-                                {{ $members[$post['member_id']-1]->comments->count() }}
+                            <i class="text-3xl <?php
+                                                if ($members->find($post['member_id'])->comments->count() > 0) {
+                                                    echo "text-blue-700";
+                                                }
+                                                ?> text-gray-500 chat-icon far fa-comment"></i>
+                            <div class="w-4 h-4 rounded-full text-xs <?php
+                                                                        if ($members->find($post['member_id'])->comments->count() > 0) {
+                                                                            echo "bg-blue-700";
+                                                                        }
+                                                                        ?> bg-gray-500 text-white absolute bottom-0 right-0 pointer-events-none">
+                                {{ $members->find($post['member_id'])->comments->count() }}
                             </div>
                         </div>
                     </td>
@@ -151,7 +162,7 @@
                         }
                         ?>      
                         " onclick="handleDropdown({{ $post['id']-1 }})">
-                        <p class="text-white" id="statusValue{{ $post['id'] }}">{{ $statuses->find($post['status_id'])->name }}</p>
+                        <p class="text-white" id="status_value">{{ $statuses->find($post['status_id'])->name }}</p>
                         <ul class="absolute top-0 mt-12 shadow-xl ml-20 left-0 w-48 bg-white dropdown z-50 hidden status_priority_dropdown">
                             @if(count($statuses) > 0)
                             @foreach($statuses as $status)
@@ -191,17 +202,27 @@
                     <td>
                         <span class="block mx-auto rounded-full h-6 w-6/7 bg-black overflow-hidden relative">
                             <div class="bg-purple-600 h-full z-0 relative" <?php
-                                                                            $startDate = $post['created_at'];
-                                                                            $startOf = new DateTime($startDate);
 
-                                                                            $endDate = $post['due_date'];
-                                                                            $endOf = new DateTime($endDate);
+                                                                            if ($statuses->find($post['status_id'])->name === "Done") {
+                                                                                echo 'style="width: 100%"';
+                                                                            }else if ($statuses->find($post['status_id'])->name === "Not Started") {
+                                                                                echo 'style="width: 0%"';
+                                                                            } else {
+                                                                                $startDate = $post['created_at'];
+                                                                                $startOf = strtotime($startDate);
 
-                                                                            $daysLeft = $startOf->diff($endOf)->format("%d");
+                                                                                $endDate = $post['due_date'];
+                                                                                $endOf = strtotime($endDate);
 
-                                                                            $width = ($daysLeft / 100);
+                                                                                $end = \Carbon\Carbon::parse($endOf);
+                                                                                $now = \Carbon\Carbon::parse($startOf);
+                                                                                $hoursLeft = $end->diffInHours($now);
 
-                                                                            echo 'style="width: ' . $width . '%"';
+
+                                                                                $width = $hoursLeft / 100;
+
+                                                                                echo 'style="width: ' . $width . '%"';
+                                                                            }
                                                                             ?>>
                             </div>
                             <div class="text-center text-white text-sm z-0 center w-full">
@@ -222,18 +243,37 @@
                     @if($statuses->find($post['status_id'])->name === "Not Started")
                     <td></td>
                     @else
-                    <td class="text-gray-600 times text-sm">
-                        {{ $post['updated_at'] }}
+                    <td class="text-gray-600 times text-sm" id="time_done" value="{{ $post['updated_at'] }}">
+                        <?php
+                        if ($statuses->find($post['status_id'])->name === "Done") {
+                            $startDate = $post['created_at'];
+                            $startOf = strtotime($startDate);
+
+                            $endDate = $post['updated_at'];
+                            $endOf = strtotime($endDate);
+
+                            $end = \Carbon\Carbon::parse($endOf);
+                            $now = \Carbon\Carbon::parse($startOf);
+                            $length = $end->diffInHours($now);
+
+                            if ($length <= 0) {
+                                $length = $end->diffInMinutes($now);
+                                echo $length . " minutes";
+                            } else if ($length > 24) {
+                                $length = $end->diffInDays($now);
+                                echo $length . " days";
+                            } else {
+                                echo $length . " hours";
+                            }
+                        } else {
+
+                            echo \Carbon\Carbon::createFromTimeStamp(strtotime($post['created_at']))->diffForHumans();
+                        }
+                        ?>
                     </td>
                     @endif
-                    <td>
-                        <button class="bg-red-800 cursor-pointer mx-auto px-5 py-2 rounded text-white">
-
-                            <a href="{{ url('/post/destroy/'.$post['id']) }}">Delete</a>
-                        </button>
-                    </td>
                 </tr>
-
+                @endif
                 @endforeach
             </tbody>
 
@@ -260,39 +300,129 @@
             comment_wrapper.style.display = "none";
             document.querySelector('#comments_article').innerHTML = " ";
         });
+
+        var edit_member_btn = document.querySelectorAll(".edit_member_btn");
+        var edit_member_wrapper = document.querySelector(".edit_member_wrapper");
+        var manage_pupil_popup = document.getElementById("manage_pupil_popup");
+        var edit_popup_cross = document.querySelector(".edit_popup_cross");
+        var edit_member_popup = document.querySelector("#edit_member_popup");
+
+        for (var i = 0; i < edit_member_btn.length; i++) {
+
+            edit_member_btn[i].addEventListener("click", function() {
+                edit_member_popup.innerHTML = " ";
+                manage_pupil_popup.style.display = "none";
+                edit_member_wrapper.style.display = "block";
+                edit_member_wrapper.classList.add("activepopup");
+
+                var aa = $(this);
+                var member_id = aa[0].parentNode.parentNode.attributes[0].value;
+
+                $.ajax({
+                    url: "getMember/" + member_id,
+                    type: "get",
+                    dataType: "json",
+                    success: function(response) {
+                        var len = 0;
+
+                        if (response["data"] != null) {
+                            len = response["data"].length;
+                        }
+
+                        if (len > 0) {
+                            console.log(response["data"]);
+                            var member_avatar = response["data"][0].avatar;
+                            var member_name = response["data"][0].name;
+
+                            var tr_str =
+                                "<form method='POST' action='/member/edit/" +
+                                member_id +
+                                "' autocomplete='off'>" +
+                                "<div class='mt-8'>" +
+                                "<h1 class='text-xl text-purple-600 mb-3 text-lg font-bold mb-6 outline-none'>Edit Member" +
+                                "</h1>" +
+                                "<div class='w-full'>" +
+                                "<input class='shadow w-full text-md mb-6 p-3' name='name' type='text' value='" +
+                                member_name +
+                                "' placeholder='Enter Name'>" +
+                                "<input class='shadow w-full text-md mb-6 p-3' type='text' name='avatar' value='" +
+                                member_avatar +
+                                "' placeholder='Enter URL'>" +
+                                "<div class='flex justify-center mt-4'>" +
+                                "<button type='submit' class='px-4 py-2 text-md bg-purple-600 text-white rounded-lg outline-none w-32'>Update" +
+                                "</button>" +
+                                "</div>" +
+                                "</div>" +
+                                "</div>" +
+                                "</div>" +
+                                "</form>";
+
+                            $("#edit_member_popup").append(tr_str);
+                        } else {
+                            var tr_str =
+                                "<div class='flex justify-between items-center'>" +
+                                "<p>Sorry, No Data Available!</p>" +
+                                "</div>";
+
+                            $("#edit_member_popup").append(tr_str);
+                        }
+                    }
+                });
+            });
+        }
+
+        edit_popup_cross.addEventListener("click", function() {
+            edit_member_popup.innerHTML = " ";
+            manage_pupil_popup.style.display = "block";
+            edit_member_wrapper.style.display = "none";
+        });
     </script>
 
     <script src="js/index.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+    <script src="js/index.js"></script>
+    <script src="http://momentjs.com/downloads/moment.js"></script>
+
+    <script src="https://momentjs.com/downloads/moment-timezone-with-data-10-year-range.min.js"></script>
+
+
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
     <!--AJAX Script -->
     <script type='text/javascript'>
         $(document).ready(function() {
-            document.querySelectorAll('.times').forEach((node) => {
-                node.innerHTML = moment(node.innerHTML).fromNow()
-            });
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 }
             });
             var CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
-
             // Update status
             $(document).on("click", "#status_id_li", function() {
-                var url = $(this).attr("data-link");
-
-                //add it to your data
-                var data = {
-                    _token: $(this).data('token'),
-                    testdata: 'testdatacontent'
-                }
                 var aa = $(this);
 
                 var post_id = aa[0].parentNode.lastElementChild.attributes[1].nodeValue;
-
                 var status_id = aa[0].attributes[2].value;
+                var status_value = aa[0].childNodes[3].innerHTML;
+                console.log("status_value", status_value);
 
-                if (status_id != '') {
+
+                if (status_value === "Done") {
+                    $.ajax({
+                        url: 'updateStatuss1/' + post_id,
+                        type: 'post',
+                        data: {
+                            _token: CSRF_TOKEN,
+                            status_id: status_id
+                        },
+                        success: function(response) {
+                            location.reload();
+                        }
+                    });
+                } else {
                     $.ajax({
                         url: 'updateStatuss/' + post_id,
                         type: 'post',
@@ -304,8 +434,6 @@
                             location.reload();
                         }
                     });
-                } else {
-                    alert('Fill all fields');
                 }
             });
 

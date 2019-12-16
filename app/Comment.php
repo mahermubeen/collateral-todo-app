@@ -41,6 +41,11 @@ class Comment extends Model
         return $this->belongsTo(Member::class, 'member_id', 'id');
     }
 
+    public function latestComment()
+    {
+        return $this->last();
+    }
+
     public function post()
     {
         return $this->belongsTo(Post::class);

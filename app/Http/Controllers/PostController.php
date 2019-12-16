@@ -37,12 +37,27 @@ class PostController extends Controller
 
     public function add_post(Request $data)
     {
+        $data = array(
+            'title'      =>  $data['title'],
+            'member_id' => $data['member_id'],
+            'status_id' => $data['status_id'],
+            'due_date' => $data['datetimes'],
+            'category' => $data['category']
+        );
+
+        $info = $this->post->add($data);
+
+        if ($info > 0) {
+            return redirect()->back();
+        } else {
+            return redirect()->back()->with('error', 'Error! Please try again.')->withInput();
+        }
+    }
+
+    public function edit_posts(Request $data)
+    {
         $this->validate($data, [
-            'title' => ['required', 'string', 'max:255'],
-            'member_id' => ['required'],
-            'status_id' => ['max:20'],
-            'datetimes' => ['required'],
-            'category' => ['required', 'string', 'max:255']
+            'category'      =>  'required', 'string', 'max:255'
         ]);
 
         $data = array(
@@ -53,7 +68,7 @@ class PostController extends Controller
             'category' => $data['category']
         );
 
-        $info = $this->post->add($data);
+        $info = $this->post->update_posts($data, $data['category']);
 
         if ($info > 0) {
             return redirect()->back();
@@ -79,7 +94,7 @@ class PostController extends Controller
             'id'      =>  $id
         );
 
-        $this -> grade -> edit_posts($data, $where);
+        $this ->post -> edit_posts($data, $where);
 
         return redirect()->back();
 

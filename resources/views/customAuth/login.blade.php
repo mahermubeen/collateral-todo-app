@@ -28,8 +28,7 @@
 
                 <input class="shadow w-full text-md mb-6 p-3" style="display:none" name="email" type="text" value="test@gmail.com" placeholder="Username" />
 
-                <input class="shadow w-full text-md mb-6 p-3" data-lpignore=true type="password" name="password" placeholder="Password" />
-
+                <input class="shadow w-full text-md mb-6 p-3" data-lpignore=true type="password" name="password" placeholder="Password" autocomplete="current-password"/>
                 @error('password')
                 <span class="invalid-feedback" role="alert">
                     <strong>{{ $message }}</strong>

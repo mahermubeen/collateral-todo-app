@@ -63,4 +63,28 @@ class MemberController extends Controller
             return redirect()->back()->with('message', 'Member delete successfully.');
         }
     }
+
+    public function edit_member($id, Request $data)
+    {
+        if (!$id or $id < 1)
+            return redirect()->back();
+
+        $this->validate($data, [
+            'name'      =>  'required|min:1',
+            'avatar' => ['required', 'string']
+        ]);
+
+        $data = array(
+            'name'      =>  $data['name'],
+            'avatar' => $data['avatar']
+        );
+
+        $where = array(
+            'id'      =>  $id
+        );
+
+        $this->member->edit_members($data, $where);
+
+        return redirect()->back()->with('message', 'Member edited successfully!');
+    }
 }
