@@ -28,9 +28,25 @@ Route::get('/getComments/{id}', 'HomeController@getComments');
 Route::post('/update/password', 'HomeController@update_password');
 Route::get('/getMember/{id}', 'HomeController@getMember');
 
+Route::get('pagination/fetch_data', 'HomeController@fetch_data');
+
 Route::post('/member/add', 'MemberController@add_member');
 Route::get('/member/destroy/{id}', 'MemberController@destroy_member');
 Route::post('/member/edit/{id}', 'MemberController@edit_member');
+
+
+Route::post('/category/add', 'CategroyController@add_category');
+Route::get('/category/destroy/{id}', 'CategroyController@destroy_category');
+Route::post('/category/edit/{id}', 'CategroyController@edit_category');
+Route::get('/getCategory/{id}', 'HomeController@getCategory');
+
+
+
+Route::post('/task/add', 'TaskController@add_task');
+Route::get('/task/destroy/{id}', 'TaskController@destroy_task');
+Route::post('/task/edit/{id}', 'TaskController@edit_task');
+Route::get('/getTask/{id}', 'HomeController@getTask');
+
 
 
 Route::post('/post/add', 'PostController@add_post');

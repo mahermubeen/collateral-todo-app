@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\DB;
 use MultipleIterator;
 use ArrayIterator;
 use PHPUnit\Framework\Constraint\Attribute;
+use App\Category;
+use App\Task;
 
 class LandingPageController extends Controller
 {
@@ -21,6 +23,8 @@ class LandingPageController extends Controller
     private $user;
     private $member;
     private $status;
+    private $category;
+    private $task;
 
     public function group_by($key, $data)
     {
@@ -48,15 +52,17 @@ class LandingPageController extends Controller
         $this->comment = new Comment();
         $this->member = new Member();
         $this->status = new Status();
+        $this->category = new Category();
+        $this->task = new Task();
     }
 
     public function index()
     {
         $data['members'] = Member::with('comments', 'posts')->get();
         $data['statuses'] = $this->status->get_statuses();
-
-        $data['posts']      = Post::with('memberss', 'statusess')->get();
-
+        $data['categoriess'] = Category::with('posts')->get();
+        $data['tasks'] = $this->task->get_tasks();
+        $data['posts']     = Post::with('memberss', 'statusess', 'tasks', 'categories', 'commentss')->get();
         $data['comments']     = Comment::with('memberss')->get();
 
 

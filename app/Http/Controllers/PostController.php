@@ -28,7 +28,7 @@ class PostController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
-        
+
         $this->post = new Post();
         $this->comment = new Comment();
         $this->member = new Member();
@@ -37,20 +37,28 @@ class PostController extends Controller
 
     public function add_post(Request $data)
     {
+        $this->validate($data, [
+            'task_id'      =>  'required',
+            'member_id'      =>  'required',
+            'status_id'      =>  'required',
+            'datetimes'      =>  'required',
+            'category_id'      =>  'required',
+        ]);
+
         $data = array(
-            'title'      =>  $data['title'],
+            'task_id'      =>  $data['task_id'],
             'member_id' => $data['member_id'],
             'status_id' => $data['status_id'],
             'due_date' => $data['datetimes'],
-            'category' => $data['category']
+            'category_id' => $data['category_id']
         );
 
         $info = $this->post->add($data);
 
         if ($info > 0) {
-            return redirect()->back();
+            return redirect()->back()->with('success', 'Successfully Added!');
         } else {
-            return redirect()->back()->with('error', 'Error! Please try again.')->withInput();
+            return redirect()->back()->with('error', 'Failed to Add Task!')->withInput();
         }
     }
 
@@ -71,18 +79,19 @@ class PostController extends Controller
         $info = $this->post->update_posts($data, $data['category']);
 
         if ($info > 0) {
-            return redirect()->back();
+            return redirect()->back()->with('success', 'Successfully Updated!');
         } else {
-            return redirect()->back()->with('error', 'Error! Please try again.')->withInput();
+            return redirect()->back()->with('error', 'Failed to Update Task!')->withInput();
         }
     }
 
-    public function edit_post($id, Request $data) {
+    public function edit_post($id, Request $data)
+    {
 
-        if(!$id or $id < 1)
-            return redirect() -> back();
+        if (!$id or $id < 1)
+            return redirect()->back()->with('error', 'Failed to Update Task!');
 
-        $this -> validate($data, [
+        $this->validate($data, [
             'abc'      =>  'required'
         ]);
 
@@ -94,10 +103,9 @@ class PostController extends Controller
             'id'      =>  $id
         );
 
-        $this ->post -> edit_posts($data, $where);
+        $this->post->edit_posts($data, $where);
 
-        return redirect()->back();
-
+        return redirect()->back()->with('success', 'Successfully Updated!');
     }
 
 
@@ -105,16 +113,16 @@ class PostController extends Controller
     {
         DB::table('posts')->delete();
 
-        return redirect()->back()->with('message', 'All Posts deleted successfully.');
+        return redirect()->back()->with('success', 'Successfully Deleted All Tasks');
     }
 
 
     public function destroy_post($id)
     {
         if (!$id or $id < 1)
-            return redirect()->back();
+            return redirect()->back()->with('error', 'Failed to Delete Task!');
 
         $this->post->delete_post($id);
-        return redirect()->back()->with('message', 'Post delete successfully.');
+        return redirect()->back()->with('success', 'Successfully Deleted!');
     }
 }

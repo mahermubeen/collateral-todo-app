@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+
 use Illuminate\Http\Request;
 
 use App\Post;
@@ -9,8 +10,10 @@ use App\Comment;
 use App\User;
 use App\Member;
 use App\Status;
-use DB;
+use App\Category;
+use App\Task;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class HomeController extends Controller
@@ -20,6 +23,8 @@ class HomeController extends Controller
     private $user;
     private $member;
     private $status;
+    private $category;
+    private $task;
 
     public function __construct()
     {
@@ -29,6 +34,8 @@ class HomeController extends Controller
         $this->user = new User();
         $this->member = new Member();
         $this->status = new Status();
+        $this->category = new Category();
+        $this->task = new Task();
     }
 
     public function group_by($key, $data)
@@ -48,10 +55,14 @@ class HomeController extends Controller
 
     public function dashboard()
     {
-        $data['members'] = Member::with('comments', 'posts')->get();
+        $data['members'] = $this->member->get_members();
+        $data['memberssss'] = Member::paginate(5);
+
+        $data['categoriess'] = Category::with('posts')->get();
+        $data['tasks'] = $this->task->get_tasks();
         $data['statuses'] = $this->status->get_statuses();
         $data['comments']     = Comment::with('memberss')->get();
-        $data['posts']     = Post::with('memberss', 'statusess')->get();
+        $data['posts']     = Post::with('memberss', 'statusess', 'tasks', 'categories', 'commentss')->get();
 
 
         $post_memberId = DB::table('posts')->pluck('member_id');
@@ -68,7 +79,7 @@ class HomeController extends Controller
         foreach ($data2 as $index => $counter) {
             array_push($postsArr,  $data1[$index]->getAttributes());
         }
-        $byGroup = self::group_by("category", $postsArr);
+        $byGroup = self::group_by("category_id", $postsArr);
         $data['categories'] = $byGroup;
         // dd($data['categories']);
 
@@ -100,6 +111,17 @@ class HomeController extends Controller
     }
 
 
+    //Fetch members ajax
+    function fetch_data(Request $request)
+    {
+        if ($request->ajax()) {
+            $data = DB::table('members')->paginate(5);
+            return view('pages.dashboard', compact('data'))->render();
+        }
+    }
+
+
+
     // Fetch Comments Record for AJAX
     public function getComments($id)
     {
@@ -116,8 +138,24 @@ class HomeController extends Controller
         exit;
     }
 
+    // Fetch Task Record for AJAX
+    public function getTask($id)
+    {
+        $tasks['data'] = Task::where('id', $id)->get();
+        echo json_encode($tasks);
+        exit;
+    }
 
-    // Update Status
+    // Fetch Category Record for AJAX
+    public function getCategory($id)
+    {
+        $categories['data'] = Category::where('id', $id)->get();
+        echo json_encode($categories);
+        exit;
+    }
+
+
+    // Update Status AJAX
     public function updateStatus(Request $request, $id)
     {
         $status_id = $request->input('status_id');
@@ -129,9 +167,9 @@ class HomeController extends Controller
             // Call updateData() method of Comment Model
             $id = $this->post->edit_posts($data, $id);
             if ($id > 0)
-                return redirect('/dashboard');
+                return redirect('/dashboard')->with('success', 'Status Updated Successfully!');
         } else {
-            echo 'Fill all fields.';
+            return redirect('/dashboard')->with('error', 'Status Updating Failed!');
         }
 
         exit;
@@ -149,9 +187,9 @@ class HomeController extends Controller
             // Call updateData() method of Comment Model
             $id = $this->post->edit_posts($data, $id);
             if ($id > 0)
-                return redirect('/dashboard');
+                return redirect('/dashboard')->with('success', 'Status Updated Successfully!');
         } else {
-            echo 'Fill all fields.';
+            return redirect('/dashboard')->with('error', 'Status Updating Failed!');
         }
 
         exit;
@@ -172,7 +210,7 @@ class HomeController extends Controller
         $info = $this->user->edit_users($data);
 
         if ($info > 0) {
-            return redirect()->back();
+            return redirect()->back()->with('success', 'Password Updated Successfully!');
         } else {
             return redirect()->back()->with('error', 'Error! Please try again.')->withInput();
         }

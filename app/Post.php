@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Post extends Model
 {
-    protected $fillable     = ['title', 'member_id', 'status_id', 'due_date', 'category', 'created_at'];
+    protected $fillable     = ['task_id', 'member_id', 'status_id', 'due_date', 'category_id'];
 
 
     public function add($data)
@@ -50,6 +50,16 @@ class Post extends Model
     public function memberss()
     {
         return $this->belongsTo(Member::class, 'member_id', 'id');
+    }
+
+    public function categories()
+    {
+        return $this->belongsTo(Category::class, 'category_id', 'id');
+    }
+
+    public function tasks()
+    {
+        return $this->belongsTo(Task::class, 'task_id', 'id');
     }
 
 
