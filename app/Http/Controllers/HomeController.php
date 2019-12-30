@@ -61,7 +61,7 @@ class HomeController extends Controller
         $data['categoriess'] = Category::with('posts')->get();
         $data['tasks'] = $this->task->get_tasks();
         $data['statuses'] = $this->status->get_statuses();
-        $data['comments']     = Comment::with('memberss')->get();
+        $data['comments']     = Comment::with('memberss', 'posts')->get();
         $data['posts']     = Post::with('memberss', 'statusess', 'tasks', 'categories', 'commentss')->get();
 
 
@@ -107,6 +107,11 @@ class HomeController extends Controller
         }
         $data['commentsNo'] = $comments_arr;
 
+
+        // $hello = Comment::with('memberss')->where('post_id', 1)->latest()->get();
+        // dd($hello);
+
+
         return view('pages.dashboard', $data);
     }
 
@@ -125,7 +130,7 @@ class HomeController extends Controller
     // Fetch Comments Record for AJAX
     public function getComments($id)
     {
-        $comments['data'] = Comment::with('memberss')->where('member_id', $id)->latest()->get();
+        $comments['data'] = Comment::where('post_id', $id)->with('memberss')->latest()->get();
         echo json_encode($comments);
         exit;
     }

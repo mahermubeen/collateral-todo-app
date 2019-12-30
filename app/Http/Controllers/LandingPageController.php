@@ -62,7 +62,7 @@ class LandingPageController extends Controller
         $data['statuses'] = $this->status->get_statuses();
         $data['categoriess'] = Category::with('posts')->get();
         $data['tasks'] = $this->task->get_tasks();
-        $data['posts']     = Post::with('memberss', 'statusess', 'tasks', 'categories', 'commentss')->get();
+        $data['posts']     = Post::with('memberss', 'statusess', 'tasks', 'categories')->get();
         $data['comments']     = Comment::with('memberss')->get();
 
 

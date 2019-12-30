@@ -87,7 +87,7 @@
                     <div class="w-full">
                         <p class="text-lg pb-6">Are you sure to delete all tasks ?</p>
                         <div class="flex justify-center mb-4">
-                            <a class="rounded px-4 py-2 text-center bg-purple-600 text-white cursor-pointer ml-3 w-32" id="delete_pupil_btn" href="{{ url('/destroy/posts') }}">Yes</a>
+                            <a class="rounded px-4 py-2 text-center bg-purple-600 text-white cursor-pointer ml-3 w-32" id="delete_post_btn1">Yes</a>
 
                             <button class="px-4 py-2 text-md border border-gray-600 text-gray-600 rounded outline-none w-32 ml-4 cancel_delete_btn1">
                                 No
@@ -109,11 +109,6 @@
                             <button type="submit" class="rounded px-4 py-2 text-center bg-purple-600 text-white cursor-pointer ml-3 w-32">
                                 Add
                             </button>
-                            @error('task')
-                            <span class="invalid-feedback" role="alert">
-                                <strong>{{ $message }}</strong>
-                            </span>
-                            @enderror
                         </form>
                         <table class="w-full">
                             <thead>
@@ -249,11 +244,9 @@
 
             <a class="rounded px-4 py-2 text-center border border-purple-600 text-purple-600 mr-3 bg-white-600 text-white outline-none cursor-pointer" id="change-pass">Change Password</a>
             <a class="rounded px-4 py-2 text-center border text-white-600 mr-3 bg-purple-600 text-white outline-none cursor-pointer" id="manage_tasks">Manage Tasks</a>
-            <a class="rounded px-4 py-2 text-center border text-white-600 mr-auto bg-purple-600 text-white outline-none cursor-pointer" id="manage_categories">Manage Categories</a>
-            @if(count($posts) > 0)
-            <a class="bg-red-800 cursor-pointer delete_btn1 mr-3 outline-none px-2 py-2 rounded text-white">Delete All</a>
-            @endif
-            <button class="rounded px-4 py-2 text-center bg-purple-600 text-white cursor-pointer outline-none" id="manage_pupil_btn">Manage People
+            <a class="rounded px-4 py-2 text-center border text-white-600 mr-auto bg-purple-600 text-white outline-none cursor-pointer" id="manage_categories">Manage Groups</a>
+
+            <button class="rounded px-4 py-2 text-center bg-purple-600 text-white cursor-pointer outline-none" id="manage_pupil_btn">Manage Team
             </button>
         </div>
 
@@ -278,9 +271,15 @@
 
         @if(count($categoriess) > 0)
         @foreach($categoriess as $key => $category)
-        <h2 class="text-2xl uppercase">
-            {{ $category->name }}
-        </h2>
+        <div class="flex">
+            <h2 class="mr-10 text-2xl uppercase">
+                {{ $category->name }}
+            </h2>
+            @if(count($category->posts) > 0)
+            <a category_id="{{ $category->id }}" class="bg-red-800 cursor-pointer delete_btn1 mr-3 outline-none px-2 py-2 rounded text-white delete_btn_post1">Delete All</a>
+            <a class="bg-purple-800 cursor-pointer  mr-3 outline-none px-2 py-2 rounded text-white">Clone</a>
+            @endif
+        </div>
         <table class="mb-10 w-full">
             <thead>
                 <tr>
@@ -314,11 +313,15 @@
                             <i class="fa fa-times text-lg cursor-pointer text-gray-700" aria-hidden="true" style="font-size: 1.5em"></i>
                         </div>
 
-                        <form method="POST" class="full-width mb-10" action="{{ url('/comment/add/'. $post->id) }}" id="Update_section">
+                        <form method="POST" class="full-width mb-10" action="{{ url('/comment/add') }}" id="Update_section">
                             @csrf
+                            <div class="task_name" value="{{ $tasks->find($post->task_id)->id }}" id="task_name">
+
+                            </div>
                             <div class="flex justify-center items-center member_details" value="{{ $members->find($post->member_id)->id }}" id="member_details">
 
                             </div>
+                            <input type="text" class="hidden" id="comment_post_id" name="post_id" />
                             <div class="mt-10 " id="Update_section">
                                 <div href="#" style="display: grid; grid-template-columns: max-content 1fr;" class="flex text-gray-500x my-4">
                                     <div class="h-full bg-cover rounded-full mx-auto bg-gray-300 relative pic-wrapper" id="commentMember-img" style="background-image: url('images/person.jpeg'); width: 40px; height: 40px;">
@@ -355,20 +358,20 @@
                 </div>
 
                 <tr class="bg-gray-100 border-b border-gray-100">
-                    <td value="{{ $members->find($post->member_id)->id }}" type="{{ $members->find($post->member_id)->name }}" avatar="{{ $members->find($post->member_id)->avatar }}" data-link="{{ url('/getComments/'. $members->find($post->member_id)->id ) }}" data-token="{{ csrf_token() }}" class="bg-gray-300 text-purple-600 flex border-0 border-b-1 border-purple-600 border-l-8 flex justify-between items-center chat-container memberId">
+                    <td value="{{ $members->find($post->member_id)->id }}" taskName="{{ $tasks->find($post->task_id)->name }}" type="{{ $members->find($post->member_id)->name }}" avatar="{{ $members->find($post->member_id)->avatar }}" taskId="{{ $tasks->find($post->task_id)->id }}" postId="{{ $post->id }}" data-link="{{ url('/getComments/'. $members->find($post->member_id)->id ) }}" data-token="{{ csrf_token() }}" class="bg-gray-300 text-purple-600 flex border-0 border-b-1 border-purple-600 border-l-8 flex justify-between items-center chat-container memberId">
                         {{ $tasks->find($post->task_id)->name }}
                         <div class="relative chat-wrapper cursor-pointer">
                             <i class="text-3xl <?php
-                                                if ($members->find($post->member_id)->comments->count() > 0) {
+                                                if ($posts->find($post->id)->commentss->count() > 0) {
                                                     echo "text-blue-700";
                                                 }
                                                 ?> text-gray-500 chat-icon far fa-comment"></i>
                             <div class="w-4 h-4 rounded-full text-xs <?php
-                                                                        if ($members->find($post->member_id)->comments->count() > 0) {
+                                                                        if ($posts->find($post->id)->commentss->count() > 0) {
                                                                             echo "bg-blue-700";
                                                                         }
                                                                         ?> bg-gray-500 text-white absolute bottom-0 right-0 pointer-events-none">
-                                {{ $members->find($post->member_id)->comments->count() }}
+                                {{ $posts->find($post->id)->commentss->count() }}
                             </div>
                         </div>
                     </td>
@@ -376,7 +379,7 @@
                         <div class="h-full bg-cover rounded-full mx-auto relative pic-wrapper" style="background-image: url('{{ $members->find($post->member_id)->avatar }}'); width: 40px">
                         </div>
                     </td>
-                    <td class="text-white relative cursor-pointer status_priority_wrapper status_priority_wrapper{{ $post->id-1 }}
+                    <td class="text-white relative cursor-pointer status_priority_wrapper status_priority_wrapper{{ $post->id-255 }}
                         <?php
                         if ($statuses->find($post->status_id)->name === 'Not Started') {
                             echo 'bg-blue-600';
@@ -388,7 +391,7 @@
                             echo 'bg-red-600';
                         }
                         ?>      
-                        " onclick="handleDropdown({{ $post->id-1 }})">
+                        " onclick="handleDropdown({{ $post->id-255 }})">
                         <p class="text-white" id="status_value">{{ $statuses->find($post->status_id)->name }}</p>
                         <ul class="absolute top-0 mt-12 shadow-xl ml-20 left-0 w-48 bg-white dropdown z-50 hidden status_priority_dropdown">
                             @if(count($statuses) > 0)
@@ -441,12 +444,12 @@
                                                                                 $endDate = $post->due_date;
                                                                                 $endOf = strtotime($endDate);
 
-                                                                                $end = \Carbon\Carbon::parse($endOf);
-                                                                                $now = \Carbon\Carbon::parse($startOf);
-                                                                                $hoursLeft = $end->diffInHours($now);
+                                                                                $to = \Carbon\Carbon::parse($endOf);
+                                                                                $from = \Carbon\Carbon::parse($startOf);
 
+                                                                                $hours = $startDate->diffInHours($endDate);
 
-                                                                                $width = $hoursLeft / 100;
+                                                                                $width = $hours / 100;
 
                                                                                 echo 'style="width: ' . $width . '%"';
                                                                             }
@@ -478,17 +481,11 @@
 
                             $end = \Carbon\Carbon::parse($endOf);
                             $now = \Carbon\Carbon::parse($startOf);
-                            $length = $end->diffInHours($now);
+                            $days = $startDate->diffInDays($endDate);
+                            $hours = $startDate->copy()->addDays($days)->diffInHours($endDate);
+                            $minutes = $startDate->copy()->addDays($days)->addHours($hours)->diffInMinutes($endDate);
 
-                            if ($length <= 0) {
-                                $length = $end->diffInMinutes($now);
-                                echo $length . " minutes";
-                            } else if ($length > 24) {
-                                $length = $end->diffInDays($now);
-                                echo $length . " days";
-                            } else {
-                                echo $length . " hours";
-                            }
+                            echo $hours . " hours  " . $minutes . " minutes";
                         } else {
                             echo \Carbon\Carbon::createFromTimeStamp(strtotime($post->created_at))->diffForHumans();
                         }
@@ -516,21 +513,21 @@
                             </select>
                         </td>
                         <td>
-                            <div class="h-full bg-cover rounded-full mx-auto bg-gray-300 relative pic-wrapper" id="prof-img-{{ $category->name }}" style="background-image: url('images/person.jpeg'); width: 40px">
+                            <div class="h-full bg-cover rounded-full mx-auto bg-gray-300 relative pic-wrapper" id="prof-img-{{ $key }}" style="background-image: url('images/person.jpeg'); width: 40px">
                                 <ul class="absolute top-0 mt-12 shadow-xl -mr-2 right-0 w-48 bg-white dropdown z-50 capitalize hidden status_priority_dropdown rounded-lg" style="left:0;">
                                     @if(count($members) > 0)
                                     @foreach($members as $dd => $member)
-                                    <li value="{{ $member -> id }}" onclick="addPhoto1({{$member}}, {{ $category }})" style="display: grid; grid-template-columns: max-content 1fr;" class="border-b border-gray-300 text-green-600 h-12 flex flex-start items-center px-4 cursor-pointer">
+                                    <li value="{{ $member -> id }}" onclick="addPhoto1({{$member}}, {{ $key }})" style="display: grid; grid-template-columns: max-content 1fr;" class="border-b border-gray-300 text-green-600 h-12 flex flex-start items-center px-4 cursor-pointer">
                                         <span class=" rounded-full bg-cover block" style="background-image: url('{{ $member -> avatar }}'); width: 30px;height: 30px;"></span>
                                         <p class="ml-3">{{ $member -> name }}</p>
                                     </li>
                                     @endforeach
                                     @endif
                                 </ul>
-                                <input name="member_id" value="" id="people-id-{{ $category->name }}" type="text" class="hidden" />
+                                <input name="member_id" value="" id="people-id-{{ $key }}" type="text" class="hidden" />
                             </div>
                         </td>
-                        <td class="bg-blue-600 z-20 text-white relative cursor-pointer status_priority_wrapper status_priority_wrapper0" onclick="handleDropdown(0)">
+                        <td class="bg-blue-600 text-white relative cursor-pointer status_priority_wrapper status_priority_wrapper">
                             <p class="text-white z-0" id="ss">Not Started</p>
                             <ul class="absolute top-0 mt-12 shadow-xl ml-16 left-0 w-48 bg-white dropdown z-50 hidden status_priority_dropdown">
                                 @if(count($statuses) > 0)
@@ -733,9 +730,6 @@
             </form>
         </div>
 
-
-
-
     </div>
 
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
@@ -755,20 +749,20 @@
             document.querySelector("#people-id-" + key).value = member.id;
         }
 
-        var cancel_delete_btn1 = document.querySelector(".cancel_delete_btn1");
-        cancel_delete_btn1.addEventListener("click", function() {
-            delete_popup_wrapper1.style.display = "none";
-        });
-
         $(document).ready(function() {
+            function addPhoto1(member, key) {
+                document.querySelector(
+                    "#prof-img-" + key
+                ).style.backgroundImage = `url(${member.avatar})`;
 
+                document.querySelector("#people-id-" + key).value = member.id;
+            }
             var delete_btn_post = document.querySelectorAll(".delete_btn_post");
             var delete_post_btn = document.querySelector("#delete_post_btn");
             for (var i = 0; i < delete_btn_post.length; i++) {
                 delete_btn_post[i].addEventListener("click", function() {
                     var aa = $(this);
                     var post_id = aa[0].attributes[0].value;
-                    console.log("post_id", post_id);
 
                     delete_post_btn.setAttribute("href", "/destroy/post/" + post_id);
                     return false;
@@ -1019,7 +1013,6 @@
 
                 var canvas_wrapper = document.querySelector(".canvas_wrapper");
 
-                console.log("post_id", post_id);
 
                 if (status_value === "Done") {
 
@@ -1066,22 +1059,28 @@
                 }
                 var aa = $(this);
 
-
                 var member_id = aa[0].attributes[0].nodeValue;
-
-                var member_name = aa[0].attributes[1].value;
-                var member_avatar = aa[0].attributes[2].value;
-
+                var member_name = aa[0].attributes[2].value;
+                var member_avatar = aa[0].attributes[3].value;
                 var br_str = "<a href='#' class='text-lg text-purple-600'>" +
                     '<div class="h-12 w-12 bg-cover rounded-full mx-auto" style="background-image: url' + "('" + member_avatar + "')" + '">' +
                     "</div>" +
                     "<p class='ml-2 flex self-center'>" + member_name + "</p>" +
                     "</a>";
-
                 $("#member_details").append(br_str);
 
+
+                var task_name = aa[0].attributes[1].value;
+                var br_str = "<h2 class='text-2xl uppercase'>" + task_name + "</h2>";
+                $("#task_name").append(br_str);
+
+                var postId = aa[0].attributes[5].value;
+                var comment_post_id = document.getElementById("comment_post_id");
+                comment_post_id.value = postId;
+                console.log("post_id", postId);
+
                 $.ajax({
-                    url: 'getCommentss/' + member_id,
+                    url: 'getComments/' + postId,
                     type: 'get',
                     dataType: 'json',
                     success: function(response) {
@@ -1091,17 +1090,17 @@
                         if (response['data'] != null) {
 
                             len = response['data'].length;
+                            console.log("length", len);
                         }
 
                         if (len > 0) {
                             for (var i = 0; i < len; i++) {
 
-
                                 var member_avatar = response['data'][i].memberss.avatar;
                                 var member_name = response['data'][i].memberss.name;
 
                                 var comt_date = response['data'][i].created_at;
-                                comt_date = moment().tz('America/New_York').format('MMM DD ha');
+                                comt_date = moment().tz('America/New_York').format('MMM DD h:mm a');
 
                                 var comment_body = response['data'][i].comment;
 
@@ -1121,7 +1120,6 @@
                                     "</article>";
 
                                 $("#comments_article").append(tr_str);
-                                response = null;
                             }
                         } else {
                             var tr_str = "<div class='flex justify-between items-center'>" +
@@ -1151,9 +1149,7 @@
 
             var popup_wrapper = document.getElementById("popup_wrapper");
 
-            var delete_btn1 = document.querySelector(".delete_btn1");
-            var cancel_delete_btn1 = document.querySelector(".cancel_delete_btn1");
-            var delete_popup_wrapper1 = document.getElementById("delete_popup_wrapper1");
+
 
             var pass_popup_wrapper = document.getElementById("pass_popup_wrapper");
             var manage_pupil_btn = document.getElementById("manage_pupil_btn");
@@ -1185,9 +1181,7 @@
             });
 
 
-            delete_btn1.addEventListener("click", function() {
-                delete_popup_wrapper1.style.display = "block";
-            });
+
 
             var delete_btn = document.querySelectorAll(".delete_btn");
             var cancel_delete_btn = document.getElementById("cancel_delete_btn");
@@ -1200,15 +1194,13 @@
             cancel_delete_btn.addEventListener("click", function() {
                 delete_popup_wrapper.style.display = "none";
             });
-            cancel_delete_btn1.addEventListener("click", function() {
-                delete_popup_wrapper1.style.display = "none";
-            });
 
             var comment_wrapper = document.getElementById("comment_wrapper");
             var comment_wrapper_cross = comment_wrapper.querySelector(".fa-times");
             var comments = document.querySelectorAll(".chat-container");
             var comments_article = document.querySelector("#comments_article");
             var member_details = document.querySelector("#member_details");
+            var task_name = document.querySelector("#task_name");
             for (var i = 0; i < comments.length; i++) {
                 comments[i].addEventListener("click", function() {
                     comment_wrapper.style.display = "block";
@@ -1217,6 +1209,7 @@
             comment_wrapper_cross.addEventListener("click", function() {
                 comments_article.innerHTML = " ";
                 member_details.innerHTML = " ";
+                task_name.innerHTML = " ";
                 comment_wrapper.style.display = "none";
             });
         })
@@ -1331,6 +1324,35 @@
         }
 
         $(document).ready(function() {
+            var delete_btn1 = document.getElementsByClassName("delete_btn1");
+            var cancel_delete_btn1 = document.querySelector(".cancel_delete_btn1");
+            var delete_popup_wrapper1 = document.getElementById("delete_popup_wrapper1");
+
+            for (var i = 0; i < delete_btn1.length; i++) {
+                delete_btn1[i].addEventListener("click", function() {
+                    delete_popup_wrapper1.style.display = "block";
+
+
+
+                });
+            }
+            cancel_delete_btn1.addEventListener("click", function() {
+                delete_popup_wrapper1.style.display = "none";
+            });
+
+            var delete_btn_post1 = document.querySelectorAll(".delete_btn_post1");
+            var delete_post_btn1 = document.querySelector("#delete_post_btn1");
+            for (var i = 0; i < delete_btn_post1.length; i++) {
+                delete_btn_post1[i].addEventListener("click", function() {
+                    var aa = $(this);
+                    var category_id = aa[0].attributes[0].value;
+
+                    delete_post_btn1.setAttribute("href", "/destroyAll/posts/" + category_id);
+                    return false;
+                });
+            }
+
+
             var COLORS, Confetti, NUM_CONFETTI, PI_2, canvas, confetti, context, drawCircle, drawCircle2, drawCircle3, i, range, xpos;
             NUM_CONFETTI = 40;
             COLORS = [
@@ -1455,6 +1477,14 @@
             });
 
         })
+
+        function addPhoto1(member, key) {
+            document.querySelector(
+                "#prof-img-" + key
+            ).style.backgroundImage = `url(${member.avatar})`;
+
+            document.querySelector("#people-id-" + key).value = member.id;
+        }
     </script>
 
 

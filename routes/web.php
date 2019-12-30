@@ -54,10 +54,12 @@ Route::get('/post/destroy/{id}', 'PostController@destroy_post');
 Route::post('/post/update', 'PostController@edit_posts');
 Route::get('/destroy/posts', 'PostController@destroy_allPosts');
 Route::get('/destroy/post/{id}', 'PostController@destroy_post');
+Route::get('/destroyAll/posts/{id}', 'PostController@destroyAll_post');
+
 
 Route::post('/update/status/{id}', 'PostController@edit_post');
 
-Route::post('/comment/add/{id}', 'CommentController@add_comment');
+Route::post('/comment/add', 'CommentController@add_comment');
 
 Route::get('/login', 'CustomAuth\LoginController@showLoginForm')->name('login');
 Route::post('/customLogin', 'CustomAuth\LoginController@login');

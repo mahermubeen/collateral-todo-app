@@ -109,9 +109,9 @@ class PostController extends Controller
     }
 
 
-    public function destroy_allPosts()
+    public function destroyAll_post($id)
     {
-        DB::table('posts')->delete();
+        DB::table('posts')->where('category_id', $id)->delete();
 
         return redirect()->back()->with('success', 'Successfully Deleted All Tasks');
     }

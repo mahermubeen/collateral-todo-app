@@ -25,18 +25,19 @@ class CommentController extends Controller
         $this->member = new Member();
     }
 
-    public function add_comment(Request $data, $id)
+    public function add_comment(Request $data)
     {
 
         $this->validate($data, [
             'comment' => ['required', 'string', 'max:255'],
-            'member_id' => ['required']
+            'member_id' => ['required'],
+            'post_id' => ['required']
         ]);
 
         $data = array(
             'comment'      =>  $data['comment'],
             'member_id' => $data['member_id'],
-            'post_id' => $id
+            'post_id' => $data['post_id'],
         );
 
         $info = $this->comment->add($data);

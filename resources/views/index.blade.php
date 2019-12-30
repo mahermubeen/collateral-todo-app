@@ -73,6 +73,7 @@
     <div class="canvas_wrapper">
         <canvas id="confeti" width="300" height="300" class="active">ssgsgsdgdsg</canvas>
     </div>
+
     <div class="container mx-auto py-16">
         <div class="flex justify-end">
             @if (Auth::check())
@@ -100,6 +101,9 @@
 
         @if(count($categoriess) > 0)
         @foreach($categoriess as $key => $category)
+
+
+        @if(count($category->posts) > 0)
         <h2 class="text-2xl uppercase">
             {{ $category->name }}
         </h2>
@@ -111,7 +115,6 @@
                     <th width="20%">Status</th>
                     <th width="20%">Timeline</th>
                     <th width="20%">Time Tracking</th>
-                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -137,11 +140,11 @@
                         </div>
                         <form method="POST" class="full-width mb-10" action="{{ url('/comment/add/'. $post->id) }}" id="Update_section">
                             @csrf
-                            <div class="flex justify-center items-center">
-                                <a href="#" class="text-lg text-purple-600">
-                                    <div class="h-12 w-12 bg-cover rounded-full mx-auto" style="background-image: url('https://collateralmanagement.org/wp-content/uploads/2019/10/Sebastian-2.jpg')"></div>
-                                    <p class="ml-2 flex self-center">Sebastian Larrazabal</p>
-                                </a>
+                            <div class="task_name" value="{{ $tasks->find($post->task_id)->id }}" id="task_name">
+
+                            </div>
+                            <div class="flex justify-center items-center member_details" value="{{ $members->find($post->member_id)->id }}" id="member_details">
+
                             </div>
                             <div class="mt-10 " id="Update_section">
                                 <div href="#" style="display: grid; grid-template-columns: max-content 1fr;" class="flex text-gray-500x my-4">
@@ -180,7 +183,7 @@
 
                 @if(count($post) != null)
                 <tr class="bg-gray-100 border-b border-gray-100">
-                    <td value="{{ $members->find($post->member_id)->id }}" data-link="{{ url('/getComments/'. $members->find($post->member_id)->id ) }}" data-token="{{ csrf_token() }}" class="bg-gray-300 text-purple-600 flex border-0 border-b-1 border-purple-600 border-l-8 flex justify-between items-center chat-container memberId">
+                    <td value="{{ $members->find($post->member_id)->id }}" taskName="{{ $tasks->find($post->task_id)->name }}" type="{{ $members->find($post->member_id)->name }}" avatar="{{ $members->find($post->member_id)->avatar }}" data-link="{{ url('/getComments/'. $members->find($post->member_id)->id ) }}" data-token="{{ csrf_token() }}" class="bg-gray-300 text-purple-600 flex border-0 border-b-1 border-purple-600 border-l-8 flex justify-between items-center chat-container memberId">
                         {{ $tasks->find($post->task_id)->name }}
                         <div class="relative chat-wrapper cursor-pointer">
                             <i class="text-3xl <?php
@@ -223,13 +226,27 @@
                                     echo 'text-green-600';
                                 }
                                 if ($status->name === 'Working On it') {
-                                    echo 'text-yellow-600';
+                                    if ($statuses->find($post->status_id)->name === "Done") {
+                                        echo 'hidden';
+                                    } else {
+                                        echo 'text-yellow-600';
+                                    }
                                 }
                                 if ($status->name === 'Stuck') {
-                                    echo 'text-red-600';
+                                    if ($statuses->find($post->status_id)->name === "Done") {
+                                        echo 'hidden';
+                                    } else {
+                                        echo 'text-red-600';
+                                    }
                                 }
                                 if ($status->name === 'Not Started') {
-                                    echo 'text-blue-600';
+                                    if ($statuses->find($post->status_id)->name === "Working On it") {
+                                        echo 'hidden';
+                                    } else if ($statuses->find($post->status_id)->name === "Done") {
+                                        echo 'hidden';
+                                    } else {
+                                        echo 'text-blue-600';
+                                    }
                                 } ?>">
                                 <span class="w-4 h-4 rounded-full block mr-3 
                                     <?php if ($status->name === 'Done') {
@@ -242,8 +259,13 @@
                                         echo 'bg-red-600';
                                     }
                                     if ($status->name === 'Not Started') {
-                                        echo 'bg-blue-600';
-                                    } ?>"></span>
+                                        if ($statuses->find($post->status_id)->name === "Working On it") {
+                                            echo 'bg-gray-600';
+                                        } else {
+                                            echo 'bg-blue-600';
+                                        }
+                                    }
+                                    ?>"></span>
                                 <p value="{{ $status -> id }}">{{ $status -> name }}</p>
                                 <input type="text" class="hidden" id="status_id_input" name="status_id" />
                             </li>
@@ -266,12 +288,12 @@
                                                                                 $endDate = $post->due_date;
                                                                                 $endOf = strtotime($endDate);
 
-                                                                                $end = \Carbon\Carbon::parse($endOf);
-                                                                                $now = \Carbon\Carbon::parse($startOf);
-                                                                                $hoursLeft = $end->diffInHours($now);
+                                                                                $to = \Carbon\Carbon::parse($endOf);
+                                                                                $from = \Carbon\Carbon::parse($startOf);
 
+                                                                                $hours = $startDate->diffInHours($endDate);
 
-                                                                                $width = $hoursLeft / 100;
+                                                                                $width = $hours / 100;
 
                                                                                 echo 'style="width: ' . $width . '%"';
                                                                             }
@@ -279,15 +301,11 @@
                             </div>
                             <div class="text-center text-white text-sm z-0 center w-full">
                                 <?php
-                                $startDate = $post->created_at;
-                                $date = new DateTime($startDate);
-                                $startOf = $date->format('M d');
-
                                 $endDate = $post->due_date;
                                 $date1 = new DateTime($endDate);
                                 $endOf = $date1->format('M d');
 
-                                echo $startOf . " - " . $endOf;
+                                echo $endOf;
                                 ?>
                             </div>
                         </span>
@@ -306,28 +324,18 @@
 
                             $end = \Carbon\Carbon::parse($endOf);
                             $now = \Carbon\Carbon::parse($startOf);
-                            $length = $end->diffInHours($now);
 
-                            if ($length <= 0) {
-                                $length = $end->diffInMinutes($now);
-                                echo $length . " minutes";
-                            } else if ($length > 24) {
-                                $length = $end->diffInDays($now);
-                                echo $length . " days";
-                            } else {
-                                echo $length . " hours";
-                            }
+                            $days = $startDate->diffInDays($endDate);
+                            $hours = $startDate->copy()->addDays($days)->diffInHours($endDate);
+                            $minutes = $startDate->copy()->addDays($days)->addHours($hours)->diffInMinutes($endDate);
+
+                            echo $hours . " hours  " . $minutes . " minutes";
                         } else {
                             echo \Carbon\Carbon::createFromTimeStamp(strtotime($post->created_at))->diffForHumans();
                         }
                         ?>
                     </td>
                     @endif
-                    <td>
-                        <button class="bg-red-800 cursor-pointer mx-auto px-5 py-2 rounded text-white delete_btn">
-                            Delete
-                        </button>
-                    </td>
                 </tr>
                 @else
                 <form method="POST" action="{{ url('/post/add') }}" autocomplete="off">
@@ -418,6 +426,8 @@
                 @endforeach
             </tbody>
         </table>
+        @endif
+
         @endforeach
         @else
         <div class="bg-gray-100 border-b border-gray-100"> </div>
@@ -431,14 +441,19 @@
         var comment_wrapper = document.getElementById("comment_wrapper");
         var comment_wrapper_cross = comment_wrapper.querySelector(".fa-times");
         var comments = document.querySelectorAll(".chat-container");
+        var comments_article = document.querySelector("#comments_article");
+        var member_details = document.querySelector("#member_details");
+        var task_name = document.querySelector("#task_name");
         for (var i = 0; i < comments.length; i++) {
             comments[i].addEventListener("click", function() {
                 comment_wrapper.style.display = "block";
             });
         }
         comment_wrapper_cross.addEventListener("click", function() {
+            comments_article.innerHTML = " ";
+            member_details.innerHTML = " ";
+            task_name.innerHTML = " ";
             comment_wrapper.style.display = "none";
-            document.querySelector('#comments_article').innerHTML = " ";
         });
 
         var edit_member_btn = document.querySelectorAll(".edit_member_btn");
@@ -713,8 +728,26 @@
                 }
                 var aa = $(this);
 
-
                 var member_id = aa[0].attributes[0].nodeValue;
+
+
+
+                var member_name = aa[0].attributes[2].value;
+                var member_avatar = aa[0].attributes[3].value;
+
+                console.log("member_id", member_id);
+
+                var br_str = "<a href='#' class='text-lg text-purple-600'>" +
+                    '<div class="h-12 w-12 bg-cover rounded-full mx-auto" style="background-image: url' + "('" + member_avatar + "')" + '">' +
+                    "</div>" +
+                    "<p class='ml-2 flex self-center'>" + member_name + "</p>" +
+                    "</a>";
+                $("#member_details").append(br_str);
+
+
+                var task_name = aa[0].attributes[1].value;
+                var br_str = "<h2 class='text-2xl uppercase'>" + task_name + "</h2>";
+                $("#task_name").append(br_str);
 
                 $.ajax({
                     url: 'getCommentss/' + member_id,
