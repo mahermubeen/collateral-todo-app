@@ -138,7 +138,8 @@
                         <div class="flex justify-end cross-div">
                             <i class="fa fa-times text-lg cursor-pointer text-gray-700" aria-hidden="true" style="font-size: 1.5em"></i>
                         </div>
-                        <form method="POST" class="full-width mb-10" action="{{ url('/comment/add/'. $post->id) }}" id="Update_section">
+
+                        <form method="POST" class="full-width mb-10" action="{{ url('/comment/add') }}" id="Update_section">
                             @csrf
                             <div class="task_name" value="{{ $tasks->find($post->task_id)->id }}" id="task_name">
 
@@ -146,6 +147,7 @@
                             <div class="flex justify-center items-center member_details" value="{{ $members->find($post->member_id)->id }}" id="member_details">
 
                             </div>
+                            <input type="text" class="hidden" id="comment_post_id" name="post_id" />
                             <div class="mt-10 " id="Update_section">
                                 <div href="#" style="display: grid; grid-template-columns: max-content 1fr;" class="flex text-gray-500x my-4">
                                     <div class="h-full bg-cover rounded-full mx-auto bg-gray-300 relative pic-wrapper" id="commentMember-img" style="background-image: url('images/person.jpeg'); width: 40px; height: 40px;">
@@ -183,20 +185,20 @@
 
                 @if(count($post) != null)
                 <tr class="bg-gray-100 border-b border-gray-100">
-                    <td value="{{ $members->find($post->member_id)->id }}" taskName="{{ $tasks->find($post->task_id)->name }}" type="{{ $members->find($post->member_id)->name }}" avatar="{{ $members->find($post->member_id)->avatar }}" data-link="{{ url('/getComments/'. $members->find($post->member_id)->id ) }}" data-token="{{ csrf_token() }}" class="bg-gray-300 text-purple-600 flex border-0 border-b-1 border-purple-600 border-l-8 flex justify-between items-center chat-container memberId">
+                    <td value="{{ $members->find($post->member_id)->id }}" taskName="{{ $tasks->find($post->task_id)->name }}" type="{{ $members->find($post->member_id)->name }}" avatar="{{ $members->find($post->member_id)->avatar }}" taskId="{{ $tasks->find($post->task_id)->id }}" postId="{{ $post->id }}" data-link="{{ url('/getComments/'. $members->find($post->member_id)->id ) }}" data-token="{{ csrf_token() }}" class="bg-gray-300 text-purple-600 flex border-0 border-b-1 border-purple-600 border-l-8 flex justify-between items-center chat-container memberId">
                         {{ $tasks->find($post->task_id)->name }}
                         <div class="relative chat-wrapper cursor-pointer">
                             <i class="text-3xl <?php
-                                                if ($members->find($post->member_id)->comments->count() > 0) {
+                                                if ($posts->find($post->id)->commentss->count() > 0) {
                                                     echo "text-blue-700";
                                                 }
                                                 ?> text-gray-500 chat-icon far fa-comment"></i>
                             <div class="w-4 h-4 rounded-full text-xs <?php
-                                                                        if ($members->find($post->member_id)->comments->count() > 0) {
+                                                                        if ($posts->find($post->id)->commentss->count() > 0) {
                                                                             echo "bg-blue-700";
                                                                         }
                                                                         ?> bg-gray-500 text-white absolute bottom-0 right-0 pointer-events-none">
-                                {{ $members->find($post->member_id)->comments->count() }}
+                                {{ $posts->find($post->id)->commentss->count() }}
                             </div>
                         </div>
                     </td>
@@ -729,14 +731,8 @@
                 var aa = $(this);
 
                 var member_id = aa[0].attributes[0].nodeValue;
-
-
-
                 var member_name = aa[0].attributes[2].value;
                 var member_avatar = aa[0].attributes[3].value;
-
-                console.log("member_id", member_id);
-
                 var br_str = "<a href='#' class='text-lg text-purple-600'>" +
                     '<div class="h-12 w-12 bg-cover rounded-full mx-auto" style="background-image: url' + "('" + member_avatar + "')" + '">' +
                     "</div>" +
@@ -749,8 +745,13 @@
                 var br_str = "<h2 class='text-2xl uppercase'>" + task_name + "</h2>";
                 $("#task_name").append(br_str);
 
+                var postId = aa[0].attributes[5].value;
+                var comment_post_id = document.getElementById("comment_post_id");
+                comment_post_id.value = postId;
+                console.log("post_id", postId);
+
                 $.ajax({
-                    url: 'getCommentss/' + member_id,
+                    url: 'getComments/' + postId,
                     type: 'get',
                     dataType: 'json',
                     success: function(response) {
@@ -760,17 +761,17 @@
                         if (response['data'] != null) {
 
                             len = response['data'].length;
+                            console.log("length", len);
                         }
 
                         if (len > 0) {
                             for (var i = 0; i < len; i++) {
 
-
                                 var member_avatar = response['data'][i].memberss.avatar;
                                 var member_name = response['data'][i].memberss.name;
 
                                 var comt_date = response['data'][i].created_at;
-                                comt_date = moment().format("MMM DD");
+                                comt_date = moment().tz('America/New_York').format('MMM DD h:mm a');
 
                                 var comment_body = response['data'][i].comment;
 
@@ -790,7 +791,6 @@
                                     "</article>";
 
                                 $("#comments_article").append(tr_str);
-
                             }
                         } else {
                             var tr_str = "<div class='flex justify-between items-center'>" +
