@@ -110,7 +110,7 @@
         <table class="mb-10 w-full">
             <thead>
                 <tr>
-                    <th width="20%" class="text-purple-600 text-xl text-left">Tasks</th>
+                    <th width="40%" class="text-purple-600 text-xl text-left">Tasks</th>
                     <th width="5%">Team</th>
                     <th width="20%">Status</th>
                     <th width="20%">Timeline</th>
@@ -333,7 +333,10 @@
 
                             echo $hours . " hours  " . $minutes . " minutes";
                         } else {
-                            echo \Carbon\Carbon::createFromTimeStamp(strtotime($post->created_at))->diffForHumans();
+                            $startDate = $post->created_at;
+                            $startOf = strtotime($startDate);
+
+                            echo \Carbon\Carbon::createFromTimeStamp($startOf)->diffForHumans();
                         }
                         ?>
                     </td>

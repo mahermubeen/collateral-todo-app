@@ -2,7 +2,9 @@
 @import "fonts";
 
 //reset style
-*, *::after, *::before {
+*,
+*::after,
+*::before {
     margin: 0;
     box-sizing: border-box;
 }
@@ -11,34 +13,44 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Poppins', sans-serif;
+
+    font-family: sofia-pro, sans-serif;
 }
 
-.wrapper{
+.wrapper {
     background: url(../images/bg.png) no-repeat;
     background-position-x: right;
     background-size: 55% 59px;
+}
+
+a,
+td {
+    font-weight: 400 !important;
+    font-size: 16px !important;
 }
 
 .container {
     margin: 0 auto;
     max-width: 1170px;
 }
-html{
+html {
     scroll-behavior: smooth;
-    font-family: Poppins-regular, sans-serif;
+    font-family: sofia-pro, sans-serif;
 }
-
 
 h1 {
-    font-family: myriad-pro, sans-serif;
+    font-weight: 400;
+    font-size: 16px;
 }
 
-button, input, textarea, select {
+button,
+input,
+textarea,
+select {
     outline: none;
 }
 
-img{
+img {
     max-width: 100%;
 }
 
@@ -51,35 +63,35 @@ a {
     text-decoration: none;
 }
 
-.flex{
+.flex {
     display: flex;
     flex-wrap: wrap;
     align-content: center;
 }
-.center{
+.center {
     display: grid;
     align-items: center;
     justify-content: center !important;
 }
-.align-center{
+.align-center {
     align-items: center;
 }
-.space-between, .justify-spaceBetween{
-    justify-content: space-between ;
+.space-between,
+.justify-spaceBetween {
+    justify-content: space-between;
 }
 
-.uppercase{
+.uppercase {
     text-transform: uppercase;
 }
 
-.shadow{
+.shadow {
     box-shadow: $secondary-shadow !important;
 }
 
 .benz-btn {
     border: none;
     color: #ffffff;
-    font-family: 'Poppins', sans-serif;
     font-size: 18px;
     width: 174px;
     padding: 12px 0;
@@ -88,109 +100,108 @@ a {
     background-color: transparent;
 }
 
-
 //services and repair css
-.heading{
-    color:#004700;
+.heading {
+    color: #004700;
     font-size: 50px;
     line-height: 55px;
     padding: 45px 0 0;
 }
-.heading2{
-    color:#727272;
+.heading2 {
+    color: #727272;
     font-size: 23px;
     line-height: 28px;
 }
-.heading3{
-    color:#ffffff;
+.heading3 {
+    color: #ffffff;
     font-size: 40px;
     line-height: 50px;
 }
-.heading4{
-    color:#ffffff;
+.heading4 {
+    color: #ffffff;
     font-size: 23px;
     line-height: 28px;
 }
-.heading5{
-    color:#32cd32;
+.heading5 {
+    color: #32cd32;
     font-size: 20px;
     line-height: 50px;
     font-weight: 500;
 }
-.heading6{
-    color:#32cd32;
+.heading6 {
+    color: #32cd32;
     font-size: 40px;
     line-height: 50px;
     font-weight: 500;
     padding: 45px 0 0;
 }
-.heading7{
-    color:#32cd32;
+.heading7 {
+    color: #32cd32;
     font-size: 22px;
     line-height: 28px;
     font-weight: 500;
 }
-.heading8{
-    color:#474747;
+.heading8 {
+    color: #474747;
     font-size: 40px;
     line-height: 50px;
 }
-.heading9{
-    color:#474747;
+.heading9 {
+    color: #474747;
     font-size: 23px;
     line-height: 28px;
 }
-.man-heading{
-    color:#474747;
+.man-heading {
+    color: #474747;
     font-size: 22px;
     line-height: 28px;
 }
-.paragraph{
+.paragraph {
     line-height: 32px;
     font-size: 18px;
-    color:#6c677c;
+    color: #6c677c;
 }
-.paragraph2{
+.paragraph2 {
     line-height: 32px;
     font-size: 16px;
     color: #6c677c;
 }
-.paragraph3{
+.paragraph3 {
     line-height: 32px;
     font-size: 18px;
     color: #ffffff;
 }
-.paragraph4{
+.paragraph4 {
     line-height: 28px;
     font-size: 15px;
     color: #ffffff;
 }
-.paragraph5{
+.paragraph5 {
     line-height: 32px;
     font-size: 18px;
     color: #6c677c;
 }
-.paragraph6{
+.paragraph6 {
     line-height: 30px;
     font-size: 16px;
     color: #6c677c;
 }
-.paragraph7{
+.paragraph7 {
     line-height: 32px;
     font-size: 18px;
     color: #706f72;
 }
-.paragraph8{
+.paragraph8 {
     line-height: 30px;
     font-size: 16px;
     color: #706f72;
 }
-.paragraph9{
+.paragraph9 {
     line-height: 28px;
     font-size: 16px;
     color: #6c677c;
 }
-.man-des{
+.man-des {
     line-height: 30px;
     font-size: 16px;
     color: #32cd32;
@@ -206,8 +217,6 @@ a {
     color: #6c677c;
 }
 //services and repair css end
-
-
 
 ::-webkit-scrollbar {
     width: 7px;
@@ -225,7 +234,6 @@ a {
 
 //global
 
-
 .container {
     max-width: 1170px;
     margin: 0 auto;
@@ -235,7 +243,6 @@ a {
 .main-wrapper {
     h1 {
         font-size: 2.5em;
-        font-family: Poppins-Light, sans-serif;
         line-height: 1.4em;
         padding-top: 9px;
     }
@@ -292,7 +299,6 @@ a {
 
             & > :first-child {
                 padding-right: 3em;
-
             }
         }
     }
@@ -343,7 +349,7 @@ a {
                             bottom: -72px;
                             width: 100px;
                             height: 100px;
-                            z-index: 1;;
+                            z-index: 1;
                         }
                     }
 
@@ -376,7 +382,6 @@ a {
                             .name {
                                 font-size: 1em;
                                 font-weight: bold;
-                                font-family: Poppins-regular, sans-serif;
                             }
 
                             .post {
@@ -411,14 +416,11 @@ a {
                     background-color: $green;
                 }
             }
-
         }
     }
 }
 
-
 //common sections responsive
-
 
 //@media screen and (max-width: 1240px) {
 //    .container {
@@ -426,19 +428,17 @@ a {
 //    }
 //}
 
-@media screen and (max-width: 1100px){
-    .wrapper{
+@media screen and (max-width: 1100px) {
+    .wrapper {
         background: url(../images/bg.png) no-repeat;
         background-position-x: right;
         background-size: 55% 47px;
     }
 }
 
-
-
 @media screen and (max-width: 768px) {
     .main-wrapper {
-        .heading-section{
+        .heading-section {
             padding: 3.5em 1em;
         }
     }
@@ -453,7 +453,7 @@ a {
                     margin-right: 0;
 
                     .customer {
-                        transform: translateX(68px)
+                        transform: translateX(68px);
                     }
                 }
             }
@@ -461,22 +461,21 @@ a {
     }
 }
 
-@media screen and (max-width: 765px){
+@media screen and (max-width: 765px) {
     .wrapper {
         background-size: 100% 48px;
     }
 }
 
-@media screen and (max-width: 670px){
+@media screen and (max-width: 670px) {
     .wrapper {
         background-size: 100% 70px;
     }
 }
 
-
 @media screen and (max-width: 425px) {
     .main-wrapper {
-        .heading-section{
+        .heading-section {
             padding: 3em 1em;
         }
     }
@@ -498,7 +497,7 @@ a {
     .wrapper.search-by-cart {
         .container {
             .shop-by {
-                .secondary{
+                .secondary {
                     width: 75px !important;
                 }
             }
@@ -508,11 +507,10 @@ a {
 
 //own responsive style
 
-@media screen and (max-width:425px){
+@media screen and (max-width: 425px) {
     .main-wrapper {
-        h1{
+        h1 {
             font-size: 2.2em;
         }
     }
 }
-

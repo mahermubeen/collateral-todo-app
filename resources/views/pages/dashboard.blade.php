@@ -82,6 +82,7 @@
             </div>
             @endif
 
+
             <div class="fixed w-screen h-screen fixed top-0 left-0 z-50 bg-popup hidden" id="delete_popup_wrapper1">
                 <div class="center bg-white p-8 rounded-lg activepopup container rounded-lg">
                     <div class="w-full">
@@ -97,6 +98,21 @@
                 </div>
             </div>
 
+            <div class="fixed w-screen h-screen fixed top-0 left-0 z-50 bg-popup hidden" id="clone_popup_wrapper">
+                <div class="center bg-white p-8 rounded-lg activepopup container rounded-lg">
+                    <div class="w-full">
+                        <form method="POST" name="post_form" action="{{ url('/post/add') }}" autocomplete="off">
+                            <div class="flex justify-center mb-4">
+                                <a class="rounded px-4 py-2 text-center bg-purple-600 text-white cursor-pointer ml-3 w-32" type="submit">Confirm</a>
+
+                                <a class="px-4 py-2 text-center text-md border cursor-pointer border-gray-600 text-gray-600 rounded outline-none w-32 ml-4 cancel_clone_btn">
+                                    Cancel
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
 
             <div class="fixed w-screen h-screen fixed top-0 left-0 z-50 bg-popup hidden" id="manage_tasks_wrapper">
                 <div class="center bg-white p-8 rounded-lg activepopup container rounded-lg">
@@ -242,12 +258,14 @@
                 </div>
             </div>
 
+
+
             <a class="rounded px-4 py-2 text-center border border-purple-600 text-purple-600 mr-3 bg-white-600 text-white outline-none cursor-pointer" id="change-pass">Change Password</a>
             <a class="rounded px-4 py-2 text-center border text-white-600 mr-3 bg-purple-600 text-white outline-none cursor-pointer" id="manage_tasks">Manage Tasks</a>
-            <a class="rounded px-4 py-2 text-center border text-white-600 mr-auto bg-purple-600 text-white outline-none cursor-pointer" id="manage_categories">Manage Groups</a>
+            <a class="rounded px-4 py-2 text-center border text-white-600 mr-3 bg-purple-600 text-white outline-none cursor-pointer" id="manage_categories">Manage Groups</a>
 
-            <button class="rounded px-4 py-2 text-center bg-purple-600 text-white cursor-pointer outline-none" id="manage_pupil_btn">Manage Team
-            </button>
+            <a class="rounded px-4 py-2 text-center bg-purple-600 text-white cursor-pointer outline-none mr-auto bg-purple-600 text-white outline-none cursor-pointer" id="manage_pupil_btn">Manage Team
+            </a>
         </div>
 
 
@@ -277,13 +295,13 @@
             </h2>
             @if(count($category->posts) > 0)
             <a category_id="{{ $category->id }}" class="bg-red-800 cursor-pointer delete_btn1 mr-3 outline-none px-2 py-2 rounded text-white delete_btn_post1">Delete All</a>
-            <a class="bg-purple-800 cursor-pointer  mr-3 outline-none px-2 py-2 rounded text-white">Clone</a>
+            <a class="bg-purple-800 cursor-pointer mr-3 outline-none px-2 py-2 rounded text-white clone_btn">Clone</a>
             @endif
         </div>
         <table class="mb-10 w-full">
             <thead>
                 <tr>
-                    <th width="20%" class="text-purple-600 text-xl text-left">Tasks</th>
+                    <th width="40%" class="text-purple-600 text-xl text-left">Tasks</th>
                     <th width="5%">Team</th>
                     <th width="20%">Status</th>
                     <th width="20%">Timeline</th>
@@ -366,7 +384,7 @@
                                                     echo "text-blue-700";
                                                 }
                                                 ?> text-gray-500 chat-icon far fa-comment"></i>
-                            <div class="w-4 h-4 rounded-full text-xs <?php
+                            <div style="padding-top: 1px;" class="w-4 h-4 rounded-full text-xs <?php
                                                                         if ($posts->find($post->id)->commentss->count() > 0) {
                                                                             echo "bg-blue-700";
                                                                         }
@@ -1351,6 +1369,22 @@
                     return false;
                 });
             }
+
+
+            var clone_btn = document.getElementsByClassName("clone_btn");
+            var cancel_clone_btn = document.querySelector(".cancel_clone_btn");
+            var clone_popup_wrapper = document.getElementById("clone_popup_wrapper");
+
+            for (var i = 0; i < clone_btn.length; i++) {
+                clone_btn[i].addEventListener("click", function() {
+                    clone_popup_wrapper.style.display = "block";
+                });
+            }
+            cancel_clone_btn.addEventListener("click", function() {
+                clone_popup_wrapper.style.display = "none";
+            });
+
+
 
 
             var COLORS, Confetti, NUM_CONFETTI, PI_2, canvas, confetti, context, drawCircle, drawCircle2, drawCircle3, i, range, xpos;
